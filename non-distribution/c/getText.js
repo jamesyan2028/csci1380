@@ -12,17 +12,17 @@ const rl = readline.createInterface({
   input: process.stdin,
 });
 
-let text = "";
+let text = '';
 
 rl.on('line', (line) => {
   // 1. Read HTML input from standard input, line by line using the `readline` module.
-  text += line + "\n";
+  text += line + '\n';
 });
 
 // 2. after all input is received, use convert to output plain text.
 rl.on('close', () => {
   const output = convert(text, {
-    wordwrap: false
+    wordwrap: false,
   });
-  console.log(text);
+  console.log(output);
 });

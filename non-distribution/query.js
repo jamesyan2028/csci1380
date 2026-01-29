@@ -26,9 +26,7 @@ For example, `execSync(`echo "${input}" | ./c/process.sh`, {encoding: 'utf-8'});
 
 
 const fs = require('fs');
-const {execSync, exec} = require('child_process');
-const path = require('path');
-const { SearchSource } = require('jest');
+const {execSync} = require('child_process');
 
 
 function query(indexFile, args) {
@@ -36,7 +34,7 @@ function query(indexFile, args) {
   let processedQuery;
   try {
     processedQuery = execSync(`echo "${query}" | ./c/process.sh | ./c/stem.js`, {encoding: 'utf-8'})
-    .replace(/\r?\n|\r/g, ' ').trim();
+        .replace(/\r?\n|\r/g, ' ').trim();
   } catch (err) {
     return;
   }
@@ -57,7 +55,7 @@ function query(indexFile, args) {
     if (!line.trim()) {
       continue;
     }
-    const [term] = line.split('|').map(s => s.trim());
+    const [term] = line.split('|').map((s) => s.trim());
     if (term == processedQuery) {
       console.log(line);
     }

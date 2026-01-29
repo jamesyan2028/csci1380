@@ -50,7 +50,7 @@ const rl = readline.createInterface({
 // 1. Read the incoming local index data from standard input (stdin) line by line.
 let localIndex = '';
 rl.on('line', (line) => {
-  localIndex += line + "\n";
+  localIndex += line + '\n';
 });
 
 rl.on('close', () => {
@@ -59,7 +59,7 @@ rl.on('close', () => {
   const globalFile = process.argv[2];
 
   if (!globalFile) {
-    printMerged(null, "");
+    printMerged(null, '');
   } else {
     fs.readFile(globalFile, 'utf8', printMerged);
   }
@@ -87,7 +87,7 @@ const printMerged = (err, data) => {
     if (!line.trim()) {
       continue;
     }
-    const [word, stringFreq, url] = line.split('|').map(s => s.trim());
+    const [word, stringFreq, url] = line.split('|').map((s) => s.trim());
     const freq = parseInt(stringFreq, 10);
 
     if (!local[word]) {
@@ -95,9 +95,9 @@ const printMerged = (err, data) => {
     }
 
     if (!local[word][url]) {
-      local[word][url] = freq
+      local[word][url] = freq;
     } else {
-      local[word][url] += freq
+      local[word][url] += freq;
     }
   }
 
@@ -108,7 +108,7 @@ const printMerged = (err, data) => {
     if (!line.trim()) {
       continue;
     }
-    const [word, dataStr] = line.split('|').map(s => s.trim());
+    const [word, dataStr] = line.split('|').map((s) => s.trim());
     const strArray = dataStr.split(' ');
     const grouped = {};
     for (let i = 0; i < strArray.length; i += 2) {
@@ -132,8 +132,7 @@ const printMerged = (err, data) => {
   for (const term in local) {
     if (!global[term]) {
       global[term] = local[term];
-    }
-    else {
+    } else {
       for (const url in local[term]) {
         const localFreq = local[term][url];
         if (!global[term][url]) {
@@ -152,16 +151,15 @@ const printMerged = (err, data) => {
   for (const key of sortedKeys) {
     const urlMap = global[key];
 
-    const urlArray = Object.keys(urlMap).map(url => {
+    const urlArray = Object.keys(urlMap).map((url) => {
       return {
         url: url,
-        freq: urlMap[url]
-      }
-    })
+        freq: urlMap[url],
+      };
+    });
 
     urlArray.sort(compare);
-    const formattedPairs = urlArray.map(item => `${item.url} ${item.freq}`).join(' ');
+    const formattedPairs = urlArray.map((item) => `${item.url} ${item.freq}`).join(' ');
     console.log(`${key} |  ${formattedPairs}`);
   }
-
 };

@@ -46,8 +46,9 @@
 <body>
     <div class="container">
         <h1>Welcome to CS1380 simple links</h1>
-        <p>Check out <a href="level_2a/index.html">Some stuff</a>.</p>
-        <p>Check out <a href="level_2b/index.html">Some more stuff</a>.</p>
+        <p>Check out my <a href="level_1a/index.html">Some stuff</a>.</p>
+        <p>Check out my <a href="level_1b/index.html">Some more stuff</a>.</p>
+        <p>Check out a few <a href="level_1c/index.html">Some more more stuff</a>.</p>
     </div>
     <div class="footer">
         <p>© 2023 CS1380. All rights reserved.</p>

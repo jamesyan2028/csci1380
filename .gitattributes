@@ -1,0 +1,9 @@
+in .gitattributes:
+*.sh   text eol=lf
+*.bash text eol=lf
+*.zsh  text eol=lf
+*.py   text eol=lf
+Makefile text eol=lf
+*.mk   text eol=lf
+* text=auto
+* text eol=lf
