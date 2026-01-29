@@ -56,7 +56,8 @@ function query(indexFile, args) {
       continue;
     }
     const [term] = line.split('|').map((s) => s.trim());
-    if (term == processedQuery) {
+    const regex = new RegExp(`\\b${processedQuery}\\b`, 'i');
+    if (regex.test(term)) {
       console.log(line);
     }
   }

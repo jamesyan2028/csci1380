@@ -1,0 +1,54 @@
+<html lang="en"><head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Home Page</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+            color: #333;
+            text-align: center;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: auto;
+            padding: 20px;
+        }
+
+        h1 {
+            color: #4CAF50;
+        }
+
+        a {
+            color: #5D4037;
+            text-decoration: none;
+            font-size: 1.2em;
+        }
+
+        a:hover {
+            color: #FF5722;
+        }
+
+        .footer {
+            margin-top: 30px;
+            padding: 10px;
+            background-color: #3F51B5;
+            color: white;
+            text-align: center;
+        }
+    </style>
+<style>.village-iframe{width:100%;height:100%;border:none;display:block;position:fixed;top:0;left:0;z-index:2147483647;background:#0000003d;color-scheme:light}.village-iframe.village-loading{display:flex;justify-content:center;align-items:center}.village-iframe>.village-spinner{width:1.5rem;height:1.5rem;border:2px solid #000;border-left-color:transparent;border-bottom-color:transparent;border-radius:50%;animation:spin .45s linear infinite}.village-iframe.village-hidden{display:none}@keyframes spin{0%{transform:rotate(0)}to{transform:rotate(360deg)}}.village-hidden{display:none}[village-paths-data=facepiles]{display:flex;align-items:center;padding-right:.5rem}[village-paths-data=facepiles] img{width:1.5rem;height:1.5rem;border-radius:50%;margin-right:-.5rem}[village-paths-data=facepiles] img.village-facepiler-avatar-not-found{filter:blur(7px)}[village-paths-data=facepiles] img:last-child{margin-right:0}[village-paths-data=count]{padding-right:.25rem}[village-paths-availability=error],[village-paths-availability=found],[village-paths-availability=not-found],[village-paths-availability=not-activated]{display:none!important}[village-paths-availability=loading]{display:inline-flex!important}</style><script id="simplify-jobs-page-script" src="chrome-extension://pbanhockgagggenencehbnadejlgchfc/js/pageScript.bundle.js"></script></head>
+<body>
+    <div class="container">
+        <h1>Interesting Fact A</h1>
+        <p> In the realm of quantum physics, there's a phenomenon known as "quantum entanglement." This occurs when pairs or groups of particles interact in such a way that the quantum state of each particle cannot be described independently of the state of the others, even when the particles are separated by large distances. What's truly mind-boggling is that a change in the state of one particle instantly influences the state of the other, regardless of the distance separating them. This phenomenon was famously described by Albert Einstein as "spooky action at a distance," and it challenges our classical concepts of space and causality. Quantum entanglement is a fundamental aspect of quantum mechanics and has significant implications for the fields of quantum computing and cryptography. </p>
+    </div>
+    <div class="footer">
+        <p>© 2023 CS1380. All rights reserved.</p>
+    </div>
+
+
+</body></html>
