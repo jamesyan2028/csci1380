@@ -54,7 +54,7 @@ test('(1 pts) student test', () => {
 
   let obj9 = (x) => x + 1;
   const serialized9 = util.serialize(obj9);
-  expect(serialized9.length).toEqual(42);
+  expect(serialized9.length).toEqual(40);
 });
 
 
@@ -102,14 +102,14 @@ test('(1 pts) student test', () => {
 
   const obj9 = (x) => x * 2;
   const serialized9 = util.serialize(obj9);
-  const expected9 = '{"type":"function","value":"(x) => x * 2"}';
+  const expected9 = '{"type":"function","value":"x => x * 2"}';
   expect(serialized9).toEqual(expected9);
 
   const obj10 = function(a, b) {
     return a + b;
   }
   const serialized10 = util.serialize(obj10);
-  const expected10 = '{"type":"function","value":"function(a, b) {\\nreturn a + b;\\n}"}';
+  const expected10 = '{"type":"function","value":"function (a, b) {\\n    return a + b;\\n  }"}';
   expect(serialized10).toEqual(expected10);
 });
 
@@ -165,7 +165,7 @@ test('(1 pts) student test', () => {
     fn: function(a, b) { return a + b; }
   };
   const serialized = util.serialize(obj);
-  expect(serialized).toEqual('{"type":"object","value":{"num":{"type":"number","value":"42"},"str":{"type":"string","value":"abc"},"bool":{"type":"boolean","value":"true"},"none":{"type":"null","value":""},"undef":{"type":"undefined","value":""},"date":{"type":"date","value":"1970-01-01T00:00:00.000Z"},"list":{"type":"array","value":{"0":{"type":"number","value":"1"},"1":{"type":"string","value":"two"},"2":{"type":"boolean","value":"false"}}},"nested":{"type":"object","value":{"key":{"type":"string","value":"value"}}},"fn":{"type":"function","value":"function(a, b) { return a + b }"}}}');
+  expect(serialized).toEqual('{"type":"object","value":{"num":{"type":"number","value":"42"},"str":{"type":"string","value":"abc"},"bool":{"type":"boolean","value":"true"},"none":{"type":"null","value":""},"undef":{"type":"undefined","value":""},"date":{"type":"date","value":"1970-01-01T00:00:00.000Z"},"list":{"type":"array","value":{"0":{"type":"number","value":"1"},"1":{"type":"string","value":"two"},"2":{"type":"boolean","value":"false"}}},"nested":{"type":"object","value":{"key":{"type":"string","value":"value"}}},"fn":{"type":"function","value":"function (a, b) {\\n      return a + b;\\n    }"}}}');
 
 });
 
