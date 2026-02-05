@@ -48,7 +48,6 @@ test('(3 pts) (scenario) object with all supported data types', () => {
     list: [1, "two", false],
     nested: { key: "value" },
     err: new Error("skib"),
-    nested: {nested2: "bruh"},
     fn: function(a, b) { return a + b; }
   };;
 
@@ -84,7 +83,7 @@ test('(3 pts) (scenario) object with all supported data types', () => {
 test('(3 pts) (scenario) malformed serialized string', () => {
 /* Come up with a string that is not a valid serialized object. */
 
-  let malformedSerializedString = "123";
+  let malformedSerializedString = "{123";
 
 
   expect(() => {
