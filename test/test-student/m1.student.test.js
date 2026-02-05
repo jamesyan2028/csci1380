@@ -55,6 +55,11 @@ test('(1 pts) student test', () => {
   let obj9 = (x) => x + 1;
   const serialized9 = util.serialize(obj9);
   expect(serialized9.length).toEqual(40);
+
+  let obj10 = new Error("Something went wrong!");
+  const serialized10 = util.serialize(obj10);
+  expect(serialized10.length).toEqual(193);
+
 });
 
 
@@ -111,6 +116,11 @@ test('(1 pts) student test', () => {
   const serialized10 = util.serialize(obj10);
   const expected10 = '{"type":"function","value":"function (a, b) {\\n    return a + b;\\n  }"}';
   expect(serialized10).toEqual(expected10);
+
+  const obj11 = new Error("Something went wrong!");
+  const serialized11 = util.serialize(obj11);
+  const expected11 = '{"type":"error","value":{"type":"object","value":{"name":{"type":"string","value":"Error"},"message":{"type":"string","value":"Something went wrong!"},"cause":{"type":"undefined","value":""}}}}'
+  expect(serialized11).toEqual(expected11);
 });
 
 

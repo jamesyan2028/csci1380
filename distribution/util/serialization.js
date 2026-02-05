@@ -24,6 +24,19 @@ function serialize(object) {
   if (typeof object === 'function') {
     return JSON.stringify({type: 'function', value: object.toString()});
   }
+
+  if (object instanceof Error) {
+    const tempObj = {
+      name: object.name,
+      message: object.message,
+      cause: object.cause
+    };
+    return JSON.stringify({
+      type: 'error',
+      value: JSON.parse(serialize(tempObj))
+    });
+  }
+
   if (Array.isArray(object)) {
     let arrObjs = {}
     for (let i = 0; i < object.length; i++) {
@@ -70,6 +83,14 @@ function deserialize(string) {
       return new Date(value);
     case 'function':
       return new Function(`return (${value})`)();
+    case 'error':
+      const tempObj = deserialize(JSON.stringify(value));
+      const error = new Error(tempObj.message);
+      error.name = tempObj.name;
+      if (tempObj.cause !== undefined) {
+        error.cause = tempObj.cause;
+      }
+      return error;
     case 'array': 
       let arr = [];
       for (let key in value) {
