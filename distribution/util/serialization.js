@@ -87,9 +87,8 @@ function deserialize(string) {
       const tempObj = deserialize(JSON.stringify(value));
       const error = new Error(tempObj.message);
       error.name = tempObj.name;
-      if (tempObj.cause !== undefined) {
-        error.cause = tempObj.cause;
-      }
+      error.cause = tempObj.cause;
+      
       return error;
     case 'array': 
       let arr = [];
