@@ -68,7 +68,12 @@ function deserialize(string) {
   }
 
 
-  const data = JSON.parse(string);
+  let data;
+  try {
+    data = JSON.parse(string);
+  } catch (e) {
+    throw new SyntaxError("Invalid JSON format");
+  }
   const type = data.type;
   const value = data.value;
 
@@ -109,7 +114,7 @@ function deserialize(string) {
       }
       return obj;
     default:
-      throw new SyntaxError(`Unknown type: ${type}`);
+      throw new SyntaxError(`Invalid serialized object type`);
   }
 
 }
