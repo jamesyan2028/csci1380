@@ -126,3 +126,26 @@ distribution.node.start(() => {
 # Results and Reflections
 
 > ...
+
+# M1: Serialization / Deserialization
+## Summary
+
+The implementation of serialize/deserialize builds on the JSON.stringify() and JSON.parse() methods.
+For many of the simplier types such as string, boolean, integer, serialization/deserialization is just added the name of the type and then calling object.toString(). On top of this, the currently implementation support serialization/deserialization of null, undefined, and Date values which just consists of recording the respective type name then placing the apporiate string in the data field. For arrays and objects, serialize is recursively called on every element of the array or proerty of an object. During deserialization, string, boolean, integer, Date, null, and undefined all had striaghtforward implementations that could be called by checking the data.type field. Deserializing followed a similar pattern in arrays and objects, where the method would be recursively called on the array elements/object fields.
+
+Reading the documentation, understanding what to do, and writing the tests took the most time, around 5 hours. Writing serialize/deserialize took about 2 hours. Writing a script to test for latency and deploying on AWS took about an hour.
+
+
+My implementation comprises 3 software components, totaling 310 lines of code. Key challenges included understanding the formal for serialization/deserialization especailly for objects and arrays, and getting experience using REPL to figure out the exact formatting of tests.
+
+
+## Correctness & Performance Characterization
+
+
+> Describe how you characterized the correctness and performance of your implementation
+
+
+*Correctness*: I wrote 5 tests; these tests take 10.322s to execute. This includes objects with string, number, boolean, null, undefined, array, and object types for both serialization and deserialization accuracy, a single object containing every support type, and tests for malformed input.
+
+
+*Performance*: The latency of various subsystems is described in the `"latency"` portion of package.json. The characteristics of my development machines are summarized in the `"dev"` portion of package.json.
