@@ -52,7 +52,7 @@ function serialize(object) {
     }
     return JSON.stringify({type: 'object', value: objObjs});
   }
-
+  return '';
 }
 /**
  * @param {string} string
@@ -60,7 +60,7 @@ function serialize(object) {
  */
 function deserialize(string) {
   if (typeof string !== 'string') {
-    throw new Error(`Invalid argument type: ${typeof string}.`);
+    throw new SyntaxError(`Invalid argument type: ${typeof string}.`);
   }
 
 
