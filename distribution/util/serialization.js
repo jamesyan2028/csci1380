@@ -109,7 +109,7 @@ function deserialize(string) {
       }
       return obj;
     default:
-      throw new Error(`Unknown type: ${type}`);
+      throw new SyntaxError(`Unknown type: ${type}`);
   }
 
 }
