@@ -13,6 +13,10 @@ function serialize(object) {
     return '{"type":"undefined","value":""}';
   }
 
+  if (typeof object === 'bigint') {
+    return JSON.stringify({type: 'bigint', value: object.toString()});
+  }
+
   if (typeof object === 'number' || typeof object === 'string' || typeof object === 'boolean') {
     return JSON.stringify({type: typeof object, value: object.toString()});
   }
@@ -83,6 +87,8 @@ function deserialize(string) {
       return new Date(value);
     case 'function':
       return new Function(`return (${value})`)();
+    case 'bigint':
+      return BigInt(value);
     case 'error':
       const tempObj = deserialize(JSON.stringify(value));
       const error = new Error(tempObj.message);
