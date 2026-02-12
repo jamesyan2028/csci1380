@@ -137,7 +137,7 @@ function start(callback) {
       globalThis.distribution.local.routes.get(serviceName, (err, service) => {
         if (err || !service) {
           res.statusCode = 404;
-          res.end(globalThis.distribution.util.serialize(new Error('Service or method not found')));
+          res.end(globalThis.distribution.util.serialize([new Error('Service or method not found'), null]));
           return;
         }
         service[methodName](...args, (error, value) => {
