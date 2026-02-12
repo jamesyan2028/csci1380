@@ -149,3 +149,35 @@ My implementation comprises 3 software components, totaling 310 lines of code. K
 
 
 *Performance*: The latency of various subsystems is described in the `"latency"` portion of package.json. The characteristics of my development machines are summarized in the `"dev"` portion of package.json.
+
+# M2: Actors and Remote Procedure Calls (RPC)
+
+
+## Summary
+
+> Summarize your implementation, including key challenges you encountered. Remember to update the `report` section of the `package.json` file with the total number of hours it took you to complete each task of M2 (`hours`) and the lines of code per task.
+
+In Milestone 2, we transition from a standalone system to a distributed Actor model architecture composed of multiple independent nodes. Each node is uniquely identified by its IP and port number, which is hashed to produce a unique node id (NID). Each node also supports three local services: status, which reports information about a particular node, routes, which maps service functions to actual javascript functions that perform the operations, and comm, which is a way for nodes to send messages to each other. In addition to these services, each node also listens for messages from other nodes by running a server in node.js. When a node recieves a message from another node, it first uses string parsing to identify the service and method names, deserializes the arguments, and then runs the requested method if it is registered in routes. It then serializes the output and sends the result back through the callback function. 
+
+By far the most difficult part of the assignment was understanding what needed to be implemented, and how it would all work together at the very start. In retrospect after I understood what I needed to do, the actual implementation was not that bad, but I thought the handout was confusing and took many read throughs and experimenting with the tests in the first step before I understood what to do.
+
+
+My implementation comprises `6` software components, totaling `602` lines of code. Key challenges included understanding the assignment and what I needed to implement. As mentioned above, it took me a long time to understand what I was tasked with building and how it would fit together. I would say that reading the documentation and writing tests took over half the total time I spent on this checkpoint. I also had some difficulties testing my server implementation with jest, since it was difficult for me to find documentation on how to solve the issue "Jest did not exit one second after the test run has completed. This usually means that there are asynchrnous operations that weren't stopped ..." which occured because I started my server but didn't close it. Eventually I figured out that I just had to write the line distribution.node.server.close() to close the server.
+
+
+## Correctness & Performance Characterization
+
+> Describe how you characterized the correctness and performance of your implementation
+To verify the correctness of the implementation, I wrote 10 tests, 2 for each service method, and verified that they passed on the reference implementation. To characterize performance, I wrote a script that calculated the mean latency and throughput of 1000 comm operations.
+
+*Correctness*: I wrote `10` tests; these tests take `10.033s` to execute.
+
+
+*Performance*: I characterized the performance of comm and RPC by sending 1000 service requests in a tight loop. Average throughput and latency is recorded in `package.json`.
+
+
+## Key Feature
+
+> How would you explain the implementation of `createRPC` to someone who has no background in computer science — i.e., with the minimum jargon possible?
+
+RPCs are an abstraction that let a node to run a function available only on a different node without having to worry about the networking/communication internals. RPCs allow the client node to run a function remotely just as if it were available locally.

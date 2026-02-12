@@ -3,6 +3,7 @@
  * @typedef {string} ServiceName
  */
 
+const services = {};
 
 /**
  * @param {ServiceName | {service: ServiceName, gid?: string}} configuration
@@ -10,7 +11,20 @@
  * @returns {void}
  */
 function get(configuration, callback) {
-  return callback(new Error('routes.get not implemented'));
+  let name;
+  if (typeof configuration === 'object') {
+    name = configuration.service;
+  } else {
+    name = configuration;
+  }
+
+  const service = services[name]
+
+  if (service) {
+    callback(null, service);
+  } else {
+    callback(new Error(`Unknown Service: "${configuration}`), null);
+  }
 }
 
 /**
@@ -20,7 +34,8 @@ function get(configuration, callback) {
  * @returns {void}
  */
 function put(service, configuration, callback) {
-  return callback(new Error('routes.put not implemented'));
+  services[configuration] = service;
+  callback(null, configuration);
 }
 
 /**
@@ -28,7 +43,13 @@ function put(service, configuration, callback) {
  * @param {Callback} callback
  */
 function rem(configuration, callback) {
-  return callback(new Error('routes.rem not implemented'));
+  if (services[configuration]) {
+    const targetService = services[configuration];
+    delete services[configuration];
+    callback(null, targetService);
+  } else {
+    callback(new Error(`Configuration Not Found: "${configuration}"`));
+  }
 }
 
 module.exports = {get, put, rem};

@@ -80,10 +80,11 @@ function setNodeConfig() {
  * @returns {void}
  */
 function start(callback) {
+  global.totalMessageCount = 0;
   const server = http.createServer((req, res) => {
-    /* Your server will be listening for PUT requests. */
 
-    // Write some code...
+    global.totalMessageCount += 1;
+
 
 
     /*
@@ -92,7 +93,10 @@ function start(callback) {
     */
 
     // Write some code...
-
+    const path = req.url;
+    const partsArr = path.split('/');
+    const serviceName = partsArr[1];
+    const methodName = partsArr[2];
 
     /*
       A common pattern in handling HTTP requests in Node.js is to have a
@@ -114,6 +118,7 @@ function start(callback) {
     const body = [];
 
     req.on('data', (chunk) => {
+      body.push(chunk);
     });
 
     req.on('end', () => {
@@ -127,6 +132,19 @@ function start(callback) {
 
       // Write some code...
 
+      const serializedMessage = Buffer.concat(body).toString();
+      const args = globalThis.distribution.util.deserialize(serializedMessage);
+      globalThis.distribution.local.routes.get(serviceName, (err, service) => {
+        if (err || !service) {
+          res.statusCode = 404;
+          res.end(globalThis.distribution.util.serialize(new Error('Service or method not found')));
+          return;
+        }
+        service[methodName](...args, (error, value) => {
+          const response = globalThis.distribution.util.serialize([error, value]);
+          res.end(response);
+        });
+      });
     });
   });
 

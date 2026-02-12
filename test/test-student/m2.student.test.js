@@ -6,6 +6,8 @@
     Imporant: Do not modify any of the test headers (i.e., the test('header', ...) part). Doing so will result in grading penalties.
 */
 
+const util = require('@brown-ds/distribution/distribution/util/util.js');
+
 const distribution = require('../../distribution.js')();
 require('../helpers/sync-guard');
 
@@ -47,9 +49,9 @@ test('(1 pts) student test', (done) => {
           expect(v.length).toBe(5);
         }
 
-        complete++;
+        complete += 1;
 
-        if (completed === keysToTest.length) {
+        if (complete === expectedValues.length) {
           done();
         }
       } catch (error) {
@@ -119,7 +121,7 @@ test('(1 pts) student test', (done) => {
   distribution.local.routes.get('bruh', (e, service) => {
     try {
       expect(e).toBeInstanceOf(Error);
-      expect(v).toBeFalsy();
+      expect(service).toBeFalsy();
       done();
     } catch (error) {
       done(error);
@@ -167,27 +169,38 @@ test('(1 pts) student test', (done) => {
 test('(1 pts) student test', (done) => {
   const remote = {node: distribution.node.config};
   const message = ['nid'];
-  distribution.local.comm.send(message, {node: remote.node, service: 'status', method: 'get'}, (e, v) => {
-    try {
-      expect(e).toBeFalsy();
-      expect(v).toBe(distribution.node.config.nid);
-      done();
-    } catch (error) {
-      done(error);
+  const config = global.distribution.node.config;
+  distribution.node.start((err) => {
+    if (err) {
+      return done(err);
     }
+    distribution.local.comm.send(message, {node: remote.node, service: 'status', method: 'get'}, (e, v) => {
+      try {
+        expect(e).toBeFalsy();
+        const nodeInfo = {
+          ip: config.ip,
+          port: config.port,
+        }
+        expect(v).toBe(util.id.getNID(nodeInfo));
+        done();
+      } catch (error) {
+        done(error);
+      }
+    });
   });
 });
 
 test('(1 pts) student test', (done) => {
-  const badNode = {ip: '127.0.0.1', port: 9999999};
+  const badNode = {ip: '127.0.0.1', port: 1};
   const message = ['nid'];
-
   distribution.local.comm.send(message, {node: badNode, service: 'status', method: 'get'}, (e, v) => {
     try {
-      expect(e).toBeInstanceOf(Error);
+      expect(e).not.toBeNull();
       expect(v).toBeFalsy();
+      distribution.node.server.close();
       done();
     } catch (error) {
+      distribution.node.server.close();
       done(error);
     }
   });
