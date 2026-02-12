@@ -44,7 +44,7 @@ test('(2 pts) (scenario) collect errors and successful results', (done) => {
   };
 
   const mangoDeliveryService = (callback) => {
-    callback(new Error('bad mangos'))
+    callback(new Error('bad mangoes'))
   };
 
   const services = [
