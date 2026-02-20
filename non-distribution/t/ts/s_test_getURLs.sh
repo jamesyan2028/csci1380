@@ -17,4 +17,8 @@ then
 fi
 
 echo "$0 success: URL sets are identical"
+<<<<<<< HEAD
 exit 0
+=======
+exit 0
+>>>>>>> b0b5e3b (testing)

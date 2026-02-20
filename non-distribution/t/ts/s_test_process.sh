@@ -17,4 +17,8 @@ then
 else
     echo "$0 failure: texts are not identical"
     exit 1
+<<<<<<< HEAD
 fi
+=======
+fi
+>>>>>>> b0b5e3b (testing)

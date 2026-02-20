@@ -17,4 +17,8 @@ if $DIFF <(cat "$STUDENT_DATA"/d1.txt | c/combine.sh | sed 's/\t*$//' | sed 's/\
 else
     echo "$0 failure: ngrams are not identical"
     exit 1
+<<<<<<< HEAD
 fi
+=======
+fi
+>>>>>>> b0b5e3b (testing)

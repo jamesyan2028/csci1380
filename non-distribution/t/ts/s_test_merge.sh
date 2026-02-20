@@ -28,4 +28,8 @@ then
 else
     echo "$0 failure: global indexes are not identical"
     exit 1
+<<<<<<< HEAD
 fi
+=======
+fi
+>>>>>>> b0b5e3b (testing)

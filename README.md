@@ -180,4 +180,8 @@ To verify the correctness of the implementation, I wrote 10 tests, 2 for each se
 
 > How would you explain the implementation of `createRPC` to someone who has no background in computer science — i.e., with the minimum jargon possible?
 
+<<<<<<< HEAD
 RPCs are an abstraction that let a node to run a function available only on a different node without having to worry about the networking/communication internals. RPCs allow the client node to run a function remotely just as if it were available locally.
+=======
+RPCs are an abstraction that let a node to run a function available only on a different node without having to worry about the networking/communication internals. RPCs allow the client node to run a function remotely just as if it were available locally.
+>>>>>>> b0b5e3b (testing)

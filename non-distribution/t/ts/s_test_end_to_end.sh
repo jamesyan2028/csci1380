@@ -35,4 +35,8 @@ else
     EXIT=1
 fi
 
+<<<<<<< HEAD
 exit $EXIT
+=======
+exit $EXIT
+>>>>>>> b0b5e3b (testing)
