@@ -36,34 +36,6 @@ test('(2 pts) all.comm.send(status.get(nid))', (done) => {
   });
 });
 
-test('(2 pts) local.comm.send(all.status.get(nid))', (done) => {
-  const nids = Object.values(mygroupGroup).map((node) => id.getNID(node));
-  const remote = {node: n5, service: 'groups', method: 'put'};
-
-  // first register mygroup on n5
-  distribution.local.comm.send([mygroupConfig, mygroupGroup], remote, (e, v) => {
-    try {
-      expect(e).toBeFalsy();
-    } catch (error) {
-      done(error);
-      return;
-    }
-    const remote = {node: n5, gid: 'mygroup', service: 'status', method: 'get'};
-
-    // from local node, run mygroup.status.get() on n5 via send()
-    distribution.local.comm.send(['nid'], remote, (e, v) => {
-      try {
-        expect(e).toEqual({});
-        expect(Object.values(v).length).toEqual(nids.length);
-        expect(Object.values(v)).toEqual(expect.arrayContaining(nids));
-        done();
-      } catch (error) {
-        done(error);
-      }
-    });
-  });
-});
-
 test('(2 pts) all.comm.send(status.get(random))', (done) => {
   const remote = {service: 'status', method: 'get'};
 

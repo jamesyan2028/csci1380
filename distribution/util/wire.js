@@ -9,6 +9,10 @@ const log = require('../util/log.js');
 
 /**
  * @param {Function} func
+<<<<<<< HEAD
+=======
+ * @returns {Function} func
+>>>>>>> upstream/main
  */
 function createRPC(func) {
   // Write some code...

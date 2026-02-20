@@ -61,6 +61,7 @@ const {useLibrary} = require('./package.json');
 const distribution = useLibrary ? require('@brown-ds/distribution') : bootstrap;
 
 /* The following code is run when distribution.js is invoked directly */
+/*
 if (require.main === module) {
   globalThis.distribution = distribution();
   globalThis.distribution.node.start(globalThis.distribution.node.config.onStart || (() => {
@@ -75,5 +76,9 @@ if (require.main === module) {
     });
   }));
 }
-
+*/
+if (require.main === module) {
+  globalThis.distribution = distribution();
+  globalThis.distribution.node.start(globalThis.distribution.node.config.onStart || (() => {}));
+}
 module.exports = distribution;
