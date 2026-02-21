@@ -35,8 +35,9 @@ function comm(config) {
       }
 
       const nodeIds = Object.keys(nodes);
-      if (nodeIds.length == 0) {
-        return callback(null, {});
+
+      if (nodeIds.length === 0) {
+        return callback(new Error('No nodes in group'), null);
       }
 
       const results = {}
@@ -56,7 +57,7 @@ function comm(config) {
         globalThis.distribution.local.comm.send(message, remote, (err, response) => {
           received += 1;
           if (err) {
-            errors[nodeId] = err;
+            errors[nodeId] = err instanceof Error ? err : new Error(String(err));
           } else {
             results[nodeId] = response;
           }
