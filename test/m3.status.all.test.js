@@ -5,8 +5,6 @@ const id = distribution.util.id;
 
 jest.spyOn(process, 'exit').mockImplementation((n) => { });
 
-<<<<<<< HEAD
-=======
 test('(2 pts) local.comm.send(all.status.get(nid))', (done) => {
   const mygroupConfig = {gid: 'mygroup'};
   const nids = Object.values(mygroupGroup).map((node) => id.getNID(node));
@@ -36,7 +34,6 @@ test('(2 pts) local.comm.send(all.status.get(nid))', (done) => {
   });
 });
 
->>>>>>> upstream/main
 test('(2 pts) all.status.get(nid)', (done) => {
   const nids = Object.values(mygroupGroup).map((node) => id.getNID(node));
 
@@ -52,8 +49,6 @@ test('(2 pts) all.status.get(nid)', (done) => {
   });
 });
 
-<<<<<<< HEAD
-=======
 test('(0 pts) all.status.get(nid) matches distributed status', (done) => {
   const remote = {service: 'status', method: 'get'};
   distribution.mygroup.comm.send(['nid'], remote, (e, v) => {
@@ -142,7 +137,6 @@ test('(0 pts) all.status.get(heapUsed)', (done) => {
   });
 });
 
->>>>>>> upstream/main
 test('(2 pts) all.status.get(random)', (done) => {
   distribution.mygroup.status.get('random', (e, v) => {
     try {

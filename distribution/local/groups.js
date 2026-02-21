@@ -4,13 +4,18 @@
  * @typedef {import("../types.js").Config} Config
  * @typedef {import("../types.js").Node} Node
  */
+const groups = {};
 
 /**
  * @param {string} name
  * @param {Callback} callback
  */
 function get(name, callback) {
-  return callback(new Error('groups.get not implemented'));
+  if (name in groups) {
+    callback(null, groups[name]);
+  } else {
+    callback(new Error(`Group ${name} not found`), null);
+  }
 }
 
 /**
@@ -19,7 +24,27 @@ function get(name, callback) {
  * @param {Callback} callback
  */
 function put(config, group, callback) {
-  return callback(new Error('groups.put not implemented'));
+  let gid;
+  if (typeof config === 'string') {
+    gid = config;
+  } else if (config && typeof config === 'object' && config.gid) {
+    gid = config.gid;
+  }
+
+  if (typeof gid !== 'string' || gid.length === 0) {
+    return callback(new Error(`Invalid GID: ${config}`), null);
+  }
+
+  groups[gid] = group;
+
+  globalThis.distribution[gid] = {};
+
+  globalThis.distribution[gid].status = require('../all/status')({gid: gid});
+  globalThis.distribution[gid].comm = require('../all/comm')({gid: gid});
+  globalThis.distribution[gid].groups = require('../all/groups')({gid: gid});
+  globalThis.distribution[gid].routes = require('../all/routes')({gid: gid});
+
+  callback(null, group);
 }
 
 /**
@@ -27,7 +52,14 @@ function put(config, group, callback) {
  * @param {Callback} callback
  */
 function del(name, callback) {
-  return callback(new Error('groups.del not implemented'));
+  if (name in groups) {
+    const target = groups[name];
+    delete groups[name];
+    delete distribution.global[name];
+    callback(null, target);
+  } else {
+    callback(new Error(`Group Not Found: ${name}`), null);
+  }
 }
 
 /**
@@ -36,7 +68,13 @@ function del(name, callback) {
  * @param {Callback} callback
  */
 function add(name, node, callback) {
-  return callback(new Error('groups.add not implemented'));
+  const sid = global.distribution.util.id.getSID(node);
+  if (name in groups) {
+    groups[name][sid] = node;
+    callback(null, node);
+  } else {
+    callback(new Error(`Group Not Found: ${name}`), null);
+  }
 };
 
 /**
@@ -45,7 +83,13 @@ function add(name, node, callback) {
  * @param {Callback} callback
  */
 function rem(name, node, callback) {
-  return callback(new Error('groups.rem not implemented'));
+  if (name in groups && node in groups[name]) {
+    const target = groups[name][node];
+    delete groups[name][node];
+    callback(null, target);
+  } else {
+    callback(new Error(`Invalid Node ${node} or Group ${name}`), null);
+  }
 };
 
 module.exports = {get, put, del, add, rem};

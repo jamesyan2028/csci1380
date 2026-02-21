@@ -23,7 +23,32 @@ function status(config) {
    * @param {Callback} callback
    */
   function get(configuration, callback) {
-    callback(new Error('status.get not implemented'));
+    const remote = {
+      service: 'status',
+      method: 'get',
+    };
+    globalThis.distribution[context.gid].comm.send([configuration], remote, (err, results) => {
+      if (err) {
+        return callback(err, null);
+      }
+
+      const aggregate = {
+        count: 0,
+        heapTotal: 0,
+        heapUsed: 0
+      };
+
+      for (const nodeId in results) {
+        const nodeStatus = results[nodeId];
+        if (nodeStatus) {
+          aggregate.count += 1;
+          aggregate.heapTotal += nodeStatus.heapTotal;
+          aggregate.heapUsed += nodeStatus.heapUsed;
+        }
+      }
+
+      callback(null, aggregate);
+    });
   }
 
   /**
@@ -31,14 +56,31 @@ function status(config) {
    * @param {Callback} callback
    */
   function spawn(configuration, callback) {
-    callback(new Error('status.spawn not implemented')); // If you won't implement this, check the skip.sh script.
+    globalThis.distribution.local.status.spawn(configuration, (err, node) => {
+      if (err) {
+        return callback(err, null);
+      }
+
+      globalThis.distribution[context.gid].groups.put(context.gid, node, (err, result) => {
+        if (err) {
+          return callback(err, null);
+        }
+        callback(null, node);
+      });
+    });
   }
 
   /**
    * @param {Callback} callback
    */
   function stop(callback) {
-    callback(new Error('status.stop not implemented')); // If you won't implement this, check the skip.sh script.
+    const remote = {
+      service: 'status',
+      method: 'stop',
+    }
+    globalThis.distribution.all.comm.send([], remote, (err, val) => {
+      callback(err, val);
+    })
   }
 
   return {get, stop, spawn};

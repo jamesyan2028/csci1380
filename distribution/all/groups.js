@@ -19,13 +19,25 @@
 function groups(config) {
   const context = {gid: config.gid || 'all'};
 
+  function broadcastHelper(method, args, callback) {
+    const remote = {
+      service: 'groups',
+      method: method
+    }
+    const groupService = globalThis.distribution[context.gid];
+    if (!groupService) {
+      return callback(new Error(`Group not found: ${context.gid}`), null);
+    }
+    groupService.comm.send(args, remote, callback);
+  }
+
   /**
    * @param {Config | string} config
    * @param {Object.<string, Node>} group
    * @param {Callback} callback
    */
   function put(config, group, callback) {
-    return callback(new Error('groups.put not implemented'));
+    broadcastHelper('put', [config, group], callback);
   }
 
   /**
@@ -33,7 +45,7 @@ function groups(config) {
    * @param {Callback} callback
    */
   function del(name, callback) {
-    return callback(new Error('groups.del not implemented'));
+    broadcastHelper('del', [name], callback);
   }
 
   /**
@@ -41,7 +53,7 @@ function groups(config) {
    * @param {Callback} callback
    */
   function get(name, callback) {
-    return callback(new Error('groups.get not implemented'));
+    broadcastHelper('get', [name], callback);
   }
 
   /**
@@ -50,7 +62,7 @@ function groups(config) {
    * @param {Callback} callback
    */
   function add(name, node, callback) {
-    return callback(new Error('groups.add not implemented'));
+    broadcastHelper('add', [name, node], callback);
   }
 
   /**
@@ -59,7 +71,7 @@ function groups(config) {
    * @param {Callback} callback
    */
   function rem(name, node, callback) {
-    return callback(new Error('groups.rem not implemented'));
+    broadcastHelper('rem', [name, node], callback);
   }
 
   return {

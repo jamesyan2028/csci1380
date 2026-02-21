@@ -29,9 +29,50 @@ function comm(config) {
    * @param {Callback} callback
    */
   function send(message, configuration, callback) {
-    callback(new Error('comm.send not implemented'));
-  }
+    globalThis.distribution.local.groups.get(context.gid, (err, nodes) => {
+      if (err) {
+        return callback(err, null);
+      }
 
+      const nodeIds = Object.keys(nodes);
+      if (nodeIds.length == 0) {
+        return callback(null, {});
+      }
+
+      const results = {}
+      /** @type {Object.<string, Error>} */
+      const errors = {}
+      let received = 0;
+      for (const nodeId of nodeIds) {
+        const node = nodes[nodeId];
+
+        const remote = {
+          node: node,
+          service: configuration.service,
+          method: configuration.method, 
+          gid: context.gid,
+        };
+
+        globalThis.distribution.local.comm.send(message, remote, (err, response) => {
+          received += 1;
+          if (err) {
+            errors[nodeId] = err;
+          } else {
+            results[nodeId] = response;
+          }
+
+          if (received === nodeIds.length) {
+            if (Object.keys(errors).length > 0) {
+              callback(errors, results)
+            } else {
+              callback(null, results);
+            }
+          }
+
+        });
+      }
+    });
+  }
   return {send};
 }
 

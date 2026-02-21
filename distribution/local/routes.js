@@ -12,19 +12,32 @@ const services = {};
  */
 function get(configuration, callback) {
   let name;
+  let gid;
   if (typeof configuration === 'object') {
     name = configuration.service;
+    gid = configuration.gid;
   } else {
     name = configuration;
   }
 
-  const service = services[name]
-
-  if (service) {
-    callback(null, service);
-  } else {
-    callback(new Error(`Unknown Service: "${configuration}`), null);
+  if (gid) {
+    const groupService = global.distribution[gid];
+    if (groupService && groupService[name]) {
+      return callback(null, groupService(name));
+    } else {
+      return callback(new Error(`Name ${name} not found in group ${gid}`), null);
+    }
   }
+  else {
+    const service = services[name]
+    if (service) {
+      callback(null, service);
+    } else {
+      callback(new Error(`Unknown Service: "${configuration}`), null);
+    }
+  }
+
+  
 }
 
 /**

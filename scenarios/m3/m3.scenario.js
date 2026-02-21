@@ -24,7 +24,7 @@ test('(5 pts) (scenario) create group', (done) => {
 
 
 
-  const nids = Object.values(allNodes).map((node) => id.getNID(node));
+  const nids = Object.values(groupA).map((node) => id.getNID(node));
 
   // Use distribution.local.groups.put to add groupA to the local node
   // Note: The groupA.status.get call should be inside the put method's callback.
@@ -141,7 +141,7 @@ test('(5 pts) (scenario) use the gossip service', (done) => {
   const groupD = {n1, n2, n3, n4, n5};
 
   // How many nodes are expected to receive the new group membership?
-  let nExpected = 4;
+  let nExpected = 3;
 
   // Experiment with the subset function used in the gossip service...
   let config = {gid: 'groupD', subset: (lst) => 2};

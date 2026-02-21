@@ -7,7 +7,6 @@
     Imporant: Do not modify any of the test headers (i.e., the test('header', ...) part). Doing so will result in grading penalties.
 */
 const { id } = require('@brown-ds/distribution/distribution/util/util.js');
-const { isExportDeclaration } = require('typescript');
 
 //const distribution = require('../../distribution.js')();
 require('../../distribution.js')();
@@ -20,23 +19,25 @@ const n3 = {ip: '127.0.0.1', port: 8002};
 const allNodes = [n1, n2, n3];
 
 
+/*
 test('(1 pts) student test', (done) => {
   // Fill out this test case...
-  const groupA = {};
-  const groupConfig = {gid: 'groupA'};
-  groupA[id.getSID(n1)] = n1;
-  groupA[id.getSID(n2)] = n2;
-  groupA[id.getSID(n3)] = n3;
+  const groupStudentA = {};
+  groupStudentA[id.getSID(n1)] = n1;
+  groupStudentA[id.getSID(n2)] = n2;
+  groupStudentA[id.getSID(n3)] = n3;
 
-  distribution.local.groups.put(groupConfig, groupA, (e, v) => {
+  distribution.local.groups.put('groupStudentA', groupStudentA, (e, v) => {
+    console.log('groupA services:', Object.keys(distribution.groupStudentA));
+    console.log('status service:', distribution.groupStudentA.status);
     distribution.local.status.get('heapTotal', (e, localHeap) => {
-      distribution.groupA.status.get('heapTotal', (e, groupHeapMap) => {
+      distribution.groupStudentA.status.get('heapTotal', (e, groupHeapMap) => {
         try {
+          console.log('e:', JSON.stringify(e));
+          console.log('v:', JSON.stringify(v));
+          console.log('type of v:', typeof v);
           expect(e).toEqual({});
-          const sids = Object.keys(groupHeapMap);
-          expect(sids).toHaveLength(3);
-          const totalSpace = Object.values(groupHeapMap).reduce((a, b) => a + b, 0);
-          expect(totalSpace).toBeGreaterThanOrEqual(localHeap * 2)
+          expect(groupHeapMap).toBeGreaterThanOrEqual(localHeap)
           done();
         } catch (error) {
           done(error);
@@ -49,13 +50,13 @@ test('(1 pts) student test', (done) => {
 
 test('(1 pts) student test', (done) => {
   // Fill out this test case...
-  const groupB = {};
-  groupB[id.getSID(n1)] = n1;
-  groupB[id.getSID(n2)] = n2;
+  const groupStudentB = {};
+  groupStudentB[id.getSID(n1)] = n1;
+  groupStudentB[id.getSID(n2)] = n2;
 
-  distribution.local.groups.put('groupB', groupB, (e, v) => {
-    distribution.local.groups.rem('groupB', id.getSID(n2), (e, v) => {
-      distribution.groupB.status.get('nid', (e, v) => {
+  distribution.local.groups.put('groupStudentB', groupStudentB, (e, v) => {
+    distribution.local.groups.rem('groupStudentB', id.getSID(n2), (e, v) => {
+      distribution.groupStudentB.status.get('sid', (e, v) => {
         try {
           expect(e).toEqual({});
           const responses = Object.keys(v);
@@ -71,7 +72,54 @@ test('(1 pts) student test', (done) => {
     });
   });
 });
+*/
 
+test('(1 pts) student test', (done) => {
+  const groupA = {};
+  groupA[id.getSID(n1)] = n1;
+  groupA[id.getSID(n2)] = n2;
+  groupA[id.getSID(n3)] = n3;
+
+  distribution.local.groups.put('groupA', groupA, (e, v) => {
+    distribution.groupA.status.get('nid', (e, v) => {
+      try {
+        expect(e).toEqual({});
+        const nids = Object.values(v);
+        expect(nids).toHaveLength(3);
+        expect(nids).toContain(id.getNID(n1));
+        expect(nids).toContain(id.getNID(n2));
+        expect(nids).toContain(id.getNID(n3));
+        done();
+      } catch (error) {
+        done(error);
+      }
+    });
+  });
+});
+
+
+test('(1 pts) student test', (done) => {
+  const groupB = {};
+  groupB[id.getSID(n1)] = n1;
+  groupB[id.getSID(n2)] = n2;
+
+  distribution.local.groups.put('groupB', groupB, (e, v) => {
+    distribution.local.groups.rem('groupB', id.getSID(n2), (e, v) => {
+      distribution.groupB.status.get('nid', (e, v) => {
+        try {
+          expect(e).toEqual({});
+          const nids = Object.values(v);
+          expect(nids).toHaveLength(1);
+          expect(nids).toContain(id.getNID(n1));
+          expect(nids).not.toContain(id.getNID(n2));
+          done();
+        } catch (error) {
+          done(error);
+        }
+      });
+    });
+  });
+});
 
 test('(1 pts) student test', (done) => {
   const groupC = {};
@@ -107,21 +155,21 @@ test('(1 pts) student test', (done) => {
 
 test('(1 pts) student test', (done) => {
   // Fill out this test case...
-  const groupA = {};
-  const groupB = {};
-  groupA[id.getSID(n1)] = n1;
-  groupB[id.getSID(n2)] = n2;
-  groupB[id.getSID(n3)] = n3;
+  const groupD = {};
+  const groupE = {};
+  groupD[id.getSID(n1)] = n1;
+  groupE[id.getSID(n2)] = n2;
+  groupE[id.getSID(n3)] = n3;
 
-  distribution.local.groups.put('groupA', groupA, (e, v) => {
-    distribution.local.groups.put('groupB', groupB, (e, v) => {
-      distribution.groupA.groups.put('groupB', groupB, (e, v) => {
+  distribution.local.groups.put('groupD', groupD, (e, v) => {
+    distribution.local.groups.put('groupE', groupE, (e, v) => {
+      distribution.groupD.groups.put('groupE', groupE, (e, v) => {
         const remote = {
           node: n1,
           service: 'groups',
           method: 'get',
         };
-        distribution.local.comm.send(['groupB'], remote, (e, v) => {
+        distribution.local.comm.send(['groupE'], remote, (e, v) => {
           try {
             expect(e).toBeFalsy();
             expect(v[id.getSID(n2)]).toBeDefined();
@@ -138,20 +186,20 @@ test('(1 pts) student test', (done) => {
 
 test('(1 pts) student test', (done) => {
   // Fill out this test case...
-  const groupA = {};
-  groupA[id.getSID(n1)] = n1;
-  groupA[id.getSID(n2)] = n2;
-  groupA[id.getSID(n3)] = n3;
+  const groupF = {};
+  groupF[id.getSID(n1)] = n1;
+  groupF[id.getSID(n2)] = n2;
+  groupF[id.getSID(n3)] = n3;
 
-  distribution.local.groups.put('groupA', groupA, (e, v) => {
-    distribution.groupA.groups.put('groupA', groupA, (e, v) => {
-      distribution.groupA.groups.rem('groupA', id.getSID(n2), (e, v) => {
+  distribution.local.groups.put('groupF', groupF, (e, v) => {
+    distribution.groupF.groups.put('groupF', groupF, (e, v) => {
+      distribution.groupF.groups.rem('groupF', id.getSID(n2), (e, v) => {
         const remote = {
           node: n1,
           service: 'groups',
           method: 'get',
         }
-        distribution.local.comm.send(['groupA'], remote, (e, v) => {
+        distribution.local.comm.send(['groupF'], remote, (e, v) => {
           try {
             expect(e).toBeFalsy();
             expect(Object.keys(v)).toHaveLength(2);
@@ -215,6 +263,7 @@ function stopAllNodes(callback) {
 
 beforeAll((done) => {
   // Stop any leftover nodes
+
   stopAllNodes(() => {
     startAllNodes(done);
   });

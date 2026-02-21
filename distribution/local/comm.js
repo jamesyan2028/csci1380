@@ -5,6 +5,7 @@
  */
 
 const http = require('node:http');
+const local = require("./local.js");
 
 /**
  * @typedef {Object} Target
@@ -31,6 +32,7 @@ function send(message, remote, callback) {
     headers: {
       'Content-Type': 'application/json',
       'Content-Length': Buffer.byteLength(serialized),
+      'distribution-gid': remote.gid || 'local',
     },
   };
   

@@ -135,7 +135,14 @@ function start(callback) {
 
       const serializedMessage = Buffer.concat(body).toString();
       const args = globalThis.distribution.util.deserialize(serializedMessage);
-      globalThis.distribution.local.routes.get(serviceName, (err, service) => {
+      const rawGid = req.headers['distribution-gid'];
+      const gid = Array.isArray(rawGid) ? rawGid[0] : rawGid;
+      
+      const routesConfig = {
+        service: serviceName,
+        gid: gid,
+      }
+      globalThis.distribution.local.routes.get(routesConfig, (err, service) => {
         if (err || !service) {
           res.statusCode = 404;
           res.end(globalThis.distribution.util.serialize([new Error('Service or method not found'), null]));
