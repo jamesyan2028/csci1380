@@ -50,7 +50,7 @@ function comm(config) {
           node: node,
           service: configuration.service,
           method: configuration.method, 
-          gid: configuration.gid || 'local'
+          gid: configuration.gid || 'local',
         };
 
         globalThis.distribution.local.comm.send(message, remote, (err, response) => {

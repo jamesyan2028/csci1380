@@ -27,7 +27,20 @@ function status(config) {
       service: 'status',
       method: 'get',
     };
-    globalThis.distribution[context.gid].comm.send([configuration], remote, callback);
+    globalThis.distribution[context.gid].comm.send([configuration], remote, (err, results) => {
+      if (configuration === 'heapTotal') {
+        let total = 0;
+        for (const nodeId in results) total += results[nodeId] || 0;
+        return callback({}, total);
+      }
+      if (configuration === 'heapUsed') {
+        return callback({}, results || {});
+      }
+      if (err && Object.keys(err).length > 0) {
+        return callback(err, {});
+      }
+      callback(err || {}, results ? Object.values(results) : []);
+    });
   }
 
   /**

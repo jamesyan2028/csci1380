@@ -11,6 +11,13 @@ const groups = {};
  * @param {Callback} callback
  */
 function get(name, callback) {
+  // Lazy init of built-in groups
+  if (!('all' in groups)) {
+    const localNode = globalThis.distribution.node.config;
+    const sid = globalThis.distribution.util.id.getSID(localNode);
+    groups['all'] = {[sid]: localNode};
+    groups['local'] = {[sid]: localNode};
+  }
   if (name in groups) {
     callback(null, groups[name]);
   } else {
@@ -72,12 +79,13 @@ function del(name, callback) {
  * @param {Callback} callback
  */
 function add(name, node, callback) {
+  const cb = callback || (() => {});
   const sid = global.distribution.util.id.getSID(node);
   if (name in groups) {
     groups[name][sid] = node;
-    callback(null, node);
+    cb(null, groups[name]);
   } else {
-    callback(new Error(`Group Not Found: ${name}`), null);
+    cb(new Error(`Group Not Found: ${name}`), null);
   }
 };
 
