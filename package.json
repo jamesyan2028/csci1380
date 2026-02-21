@@ -67,19 +67,19 @@
     {
       "milestone": "M3",
       "hours": 25,
-      "loc": 499,
+      "loc": 650,
       "dev": {
         "cpu-no": 16,
         "mem-gb": 7,
         "ssd-gb": 476
       },
       "throughput": {
-        "dev": [7.41],
-        "aws": []
+        "dev": ["7.41 nodes/sec"],
+        "aws": ["6.98 nodes/sec"]
       },
       "latency": {
         "dev": ["135.0ms"],
-        "aws": []
+        "aws": ["143.2ms"]
       },
       "dloc": 3000
     },
