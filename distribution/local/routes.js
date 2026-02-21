@@ -28,15 +28,16 @@ function get(configuration, callback) {
       return callback(new Error(`Name ${name} not found in group ${gid}`), null);
     }
   } else {
-    const service = services[name]
+    const service = services[name];
     if (service) {
-      callback(null, service);
-    } else {
-      callback(new Error(`Unknown Service: "${configuration}`), null);
+      return callback(null, service);
     }
+    const rpc = globalThis.toLocal.get(name);
+    if (rpc) {
+      return callback(null, {call: rpc});
+    }
+    callback(new Error(`Unknown Service: "${name}"`), null);
   }
-
-  
 }
 
 /**

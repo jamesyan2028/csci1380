@@ -50,7 +50,7 @@ function comm(config) {
           node: node,
           service: configuration.service,
           method: configuration.method, 
-          gid: context.gid,
+          gid: configuration.gid || 'local'
         };
 
         globalThis.distribution.local.comm.send(message, remote, (err, response) => {
@@ -65,7 +65,7 @@ function comm(config) {
             if (Object.keys(errors).length > 0) {
               callback(errors, results)
             } else {
-              callback(null, results);
+              callback({}, results);
             }
           }
 

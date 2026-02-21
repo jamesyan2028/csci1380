@@ -23,11 +23,12 @@ const local = require("./local.js");
  */
 function send(message, remote, callback) {
   const serialized = globalThis.distribution.util.serialize(message);
+  const gid = remote.gid || 'local';
 
   const options = {
     hostname: remote.node.ip,
     port: remote.node.port,
-    path: `/${remote.service}/${remote.method}`,
+    path: `/${gid}/${remote.service}/${remote.method}`,
     method: 'PUT',
     headers: {
       'Content-Type': 'application/json',
@@ -47,6 +48,10 @@ function send(message, remote, callback) {
       callback(error, value)
     });
 
+  });
+
+  req.setTimeout(2000, () => { 
+    req.destroy(new Error('Request timed out'));
   });
 
   req.on('error', (err) => {

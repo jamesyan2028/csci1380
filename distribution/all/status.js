@@ -27,28 +27,7 @@ function status(config) {
       service: 'status',
       method: 'get',
     };
-    globalThis.distribution[context.gid].comm.send([configuration], remote, (err, results) => {
-      if (err) {
-        return callback(err, null);
-      }
-
-      const aggregate = {
-        count: 0,
-        heapTotal: 0,
-        heapUsed: 0
-      };
-
-      for (const nodeId in results) {
-        const nodeStatus = results[nodeId];
-        if (nodeStatus) {
-          aggregate.count += 1;
-          aggregate.heapTotal += nodeStatus.heapTotal;
-          aggregate.heapUsed += nodeStatus.heapUsed;
-        }
-      }
-
-      callback(null, aggregate);
-    });
+    globalThis.distribution[context.gid].comm.send([configuration], remote, callback);
   }
 
   /**

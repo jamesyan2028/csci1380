@@ -96,8 +96,9 @@ function start(callback) {
     // Write some code...
     const path = req.url;
     const partsArr = path.split('/');
-    const serviceName = partsArr[1];
-    const methodName = partsArr[2];
+    const gid = partsArr[1]
+    const serviceName = partsArr[2];
+    const methodName = partsArr[3];
 
     /*
       A common pattern in handling HTTP requests in Node.js is to have a
@@ -135,9 +136,6 @@ function start(callback) {
 
       const serializedMessage = Buffer.concat(body).toString();
       const args = globalThis.distribution.util.deserialize(serializedMessage);
-      const rawGid = req.headers['distribution-gid'];
-      const gid = Array.isArray(rawGid) ? rawGid[0] : rawGid;
-      console.error('REQUEST:', serviceName, methodName, 'gid:', gid);
 
       const routesConfig = {
         service: serviceName,
@@ -158,7 +156,8 @@ function start(callback) {
           res.end(globalThis.distribution.util.serialize([new Error('Method not found'), null]));
           return;
         }
-        service[methodName](...args, (error, value) => {
+        const normalizedArgs = globalThis.distribution.util.normalize(service[methodName], args);
+        service[methodName](...normalizedArgs, (error, value) => {
           const response = globalThis.distribution.util.serialize([error, value]);
           res.end(response);
         });
