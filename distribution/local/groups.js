@@ -43,6 +43,10 @@ function put(config, group, callback) {
   globalThis.distribution[gid].comm = require('../all/comm')({gid: gid});
   globalThis.distribution[gid].groups = require('../all/groups')({gid: gid});
   globalThis.distribution[gid].routes = require('../all/routes')({gid: gid});
+  globalThis.distribution[gid].gossip = require('../all/gossip')({gid: gid});
+  globalThis.distribution[gid].mem = require('../all/mem')({gid: gid});
+  globalThis.distribution[gid].store = require('../all/store')({gid: gid});
+  globalThis.distribution[gid].mr = require('../all/mr')({gid: gid});
 
   callback(null, group);
 }
@@ -55,7 +59,7 @@ function del(name, callback) {
   if (name in groups) {
     const target = groups[name];
     delete groups[name];
-    delete distribution.global[name];
+    delete globalThis.distribution[name];
     callback(null, target);
   } else {
     callback(new Error(`Group Not Found: ${name}`), null);

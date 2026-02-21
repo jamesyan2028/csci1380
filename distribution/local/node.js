@@ -137,15 +137,25 @@ function start(callback) {
       const args = globalThis.distribution.util.deserialize(serializedMessage);
       const rawGid = req.headers['distribution-gid'];
       const gid = Array.isArray(rawGid) ? rawGid[0] : rawGid;
-      
+      console.error('REQUEST:', serviceName, methodName, 'gid:', gid);
+
       const routesConfig = {
         service: serviceName,
         gid: gid,
       }
       globalThis.distribution.local.routes.get(routesConfig, (err, service) => {
         if (err || !service) {
+          console.error('routes.get error:', err, 'service:', serviceName, 'gid:', gid);
+          console.error('gid is:', gid)
           res.statusCode = 404;
           res.end(globalThis.distribution.util.serialize([new Error('Service or method not found'), null]));
+          return;
+        }
+        if (typeof service[methodName] !== 'function') {
+          console.error('method not found:', methodName, 'on service:', serviceName);
+          console.error('gid is:', gid)
+          res.statusCode = 404;
+          res.end(globalThis.distribution.util.serialize([new Error('Method not found'), null]));
           return;
         }
         service[methodName](...args, (error, value) => {
