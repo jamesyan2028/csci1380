@@ -1,3 +1,5 @@
+const { put } = require('../../distribution/local/groups.js');
+
 require('../../distribution.js')();
 const distribution = globalThis.distribution;
 const util = distribution.util;
@@ -10,7 +12,14 @@ test('(5 pts) (scenario) use the local store', (done) => {
   */
   const user = {first: 'Josiah', last: 'Carberry'};
   const key = 'jcarbspsg';
+  distribution.local.store.put(user, key, (e, v) => {
+    if (e) {
+      done(e);
+      return;
+    }
+  });
 
+  check();
 
   function check() {
     distribution.local.store.get(key, (e, v) => {
@@ -40,8 +49,8 @@ test('(5 pts) (scenario) two keys map to the same node', () => {
     util.id.getNID({ip: '192.168.0.4', port: 8000}),
     util.id.getNID({ip: '192.168.0.5', port: 8000}),
   ];
-  let key1 = '?';
-  let key2 = '?';
+  let key1 = '123';
+  let key2 = '1234';
 
 
   const kid1 = util.id.getID(key1);
@@ -69,12 +78,12 @@ test('(5 pts) (scenario) hash functions return the same node', () => {
     util.id.getNID({ip: '192.168.0.4', port: 8000}),
   ];
 
-  let key = '?';
+  let key = '123';
 
   const kid = util.id.getID(key);
 
   let a = util.id.consistentHash(kid, nodeIds); // You can also experiment with other hash functions
-  let b = '?'; // Pick one of the other hash functions
+  let b = util.id.rendezvousHash(kid, nodeIds);
 
   expect(a).toEqual(b);
 });
@@ -96,59 +105,85 @@ test('(5 pts) (scenario) use mem.reconf', (done) => {
 
   // Create a group with any number of nodes
   const mygroupGroup = {};
+  mygroupGroup[id.getSID(n1)] = n1;
+  mygroupGroup[id.getSID(n2)] = n2;
   // Add more nodes to the group...
 
   // Create a set of items and corresponding keys...
   const keysAndItems = [
     {key: 'a', item: {first: 'Josiah', last: 'Carberry'}},
+    {key: 'b', item: '1'},
+    {key: 'c', item: '2'},
+    {key: 'd', item: '3'},
+    {key: 'e', item: '4'},
   ];
 
   // Experiment with different hash functions...
-  const config = {gid: 'mygroup', hash: '?'};
+  const config = {gid: 'mygroup', hash: util.id.consistentHash};
 
   distribution.local.groups.put(config, mygroupGroup, (e, v) => {
     // Now, place each one of the items you made inside the group...
-    distribution.mygroup.mem.put(keysAndItems[0].item, keysAndItems[0].key, (e, v) => {
-        // We need to pass a copy of the group's
-        // nodes before the changes to reconf()
-        const groupCopy = {...mygroupGroup};
-
-        // Remove a node from the group...
-        let toRemove = '?';
-        distribution.mygroup.groups.rem(
-            'mygroup',
-            id.getSID(toRemove),
-            (e, v) => {
-            // We call `reconf()` on the distributed mem service. This will place the items in the remaining group nodes...
-              distribution.mygroup.mem.reconf(groupCopy, (e, v) => {
-              // Fill out the `checkPlacement` function (defined below) based on how you think the items will have been placed after the reconfiguration...
-                checkPlacement();
-              });
-            });
+    let count = 0;
+    keysAndItems.forEach((obj) => {
+      distribution.mygroup.mem.put(obj.item, obj.key, (e, v) => {
+        console.log("sigma");
+        if (e) {
+          done(e);
+        }
+        count += 1;
+        if (count === keysAndItems.length) {
+          startReconfig();
+        }
+      });
     });
+
+    function startReconfig() {
+      const groupCopy = {...mygroupGroup};
+        // Remove a node from the group...
+      let toRemove = n1;
+      distribution.mygroup.groups.rem('mygroup',id.getSID(toRemove), (e, v) => {
+        // We call `reconf()` on the distributed mem service. This will place the items in the remaining group nodes...
+        distribution.mygroup.mem.reconf(groupCopy, (e, v) => {
+          if (e) {
+            done(e);
+          }
+        // Fill out the `checkPlacement` function (defined below) based on how you think the items will have been placed after the reconfiguration...
+          checkPlacement();
+        });
+      });
+    }
   });
 
   // This function will be called after we put items in nodes
   // Send the right messages to the right nodes to check if the items are in the right place...
   const checkPlacement = (e, v) => {
     const messages = [
-      [{key: keysAndItems[0].key, gid: 'mygroup'}],
+      {key: keysAndItems[0].key, gid: 'mygroup'},
+      {key: keysAndItems[1].key, gid: 'mygroup'},
+      {key: keysAndItems[2].key, gid: 'mygroup'},
+      {key: keysAndItems[3].key, gid: 'mygroup'},
+      {key: keysAndItems[4].key, gid: 'mygroup'}, 
     ];
 
     // Based on where you think the items should be, send the messages to the right nodes...
-    const remote = {node: '?', service: 'mem', method: 'get'};
-    distribution.local.comm.send(messages[0], remote, (e, v) => {
-      try {
-        expect(e).toBeFalsy();
-        expect(v).toEqual(keysAndItems[0].item);
-      } catch (error) {
-        done(error);
-        return;
-      }
-
-      // Write checks for the rest of the items...
-      done(); // Only call `done()` once all checks are written
-    });
+    const remote = {node: n2, service: 'mem', method: 'get'};
+    let processed = 0;
+    messages.forEach((msg) => {
+      distribution.local.comm.send([msg], remote, (e, v) => {
+        try {
+          expect(e).toBeFalsy();
+          expect(v).toEqual(v.item);
+          processed += 1;
+          if (processed === messages.length) {
+            done();
+          }
+        } catch (error) {
+          done(error);
+        }
+        // Write checks for the rest of the items...
+      });
+    })
+    
   };
 });
 
