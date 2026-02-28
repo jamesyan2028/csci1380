@@ -5,6 +5,8 @@ const distribution = globalThis.distribution;
 const util = distribution.util;
 const id = distribution.util.id;
 
+//jest.setTimeout(30000);
+
 test('(5 pts) (scenario) use the local store', (done) => {
   /*
       Use the distributed store to put a key-value pair.
@@ -112,46 +114,33 @@ test('(5 pts) (scenario) use mem.reconf', (done) => {
   // Create a set of items and corresponding keys...
   const keysAndItems = [
     {key: 'a', item: {first: 'Josiah', last: 'Carberry'}},
-    {key: 'b', item: '1'},
-    {key: 'c', item: '2'},
-    {key: 'd', item: '3'},
-    {key: 'e', item: '4'},
+    {key: 'b', item: {first: 'bruh', last: 'bruh1'}},
+
   ];
 
-  // Experiment with different hash functions...
   const config = {gid: 'mygroup', hash: util.id.consistentHash};
 
+  // Experiment with different hash functions...
   distribution.local.groups.put(config, mygroupGroup, (e, v) => {
     // Now, place each one of the items you made inside the group...
-    let count = 0;
-    keysAndItems.forEach((obj) => {
-      distribution.mygroup.mem.put(obj.item, obj.key, (e, v) => {
-        console.log("sigma");
-        if (e) {
-          done(e);
-        }
-        count += 1;
-        if (count === keysAndItems.length) {
-          startReconfig();
-        }
+    distribution.mygroup.mem.put(keysAndItems[0].item, keysAndItems[0].key, (e, v) => {
+      distribution.mygroup.mem.put(keysAndItems[1].item, keysAndItems[1].key, (e, v) => {
+        // We need to pass a copy of the group's
+        const groupCopy = {...mygroupGroup};
+        // Remove a node from the group...
+        let toRemove = n1;
+        distribution.local.groups.rem(
+            'mygroup',
+            id.getSID(toRemove),
+            (e, v) => {
+            // We call `reconf()` on the distributed mem service. This will place the items in the remaining group nodes...
+              distribution.mygroup.mem.reconf(groupCopy, (e, v) => {
+              // Fill out the `checkPlacement` function (defined below) based on how you think the items will have been placed after the reconfiguration...
+              checkPlacement();
+              });
+            });
       });
     });
-
-    function startReconfig() {
-      const groupCopy = {...mygroupGroup};
-        // Remove a node from the group...
-      let toRemove = n1;
-      distribution.mygroup.groups.rem('mygroup',id.getSID(toRemove), (e, v) => {
-        // We call `reconf()` on the distributed mem service. This will place the items in the remaining group nodes...
-        distribution.mygroup.mem.reconf(groupCopy, (e, v) => {
-          if (e) {
-            done(e);
-          }
-        // Fill out the `checkPlacement` function (defined below) based on how you think the items will have been placed after the reconfiguration...
-          checkPlacement();
-        });
-      });
-    }
   });
 
   // This function will be called after we put items in nodes
@@ -160,19 +149,16 @@ test('(5 pts) (scenario) use mem.reconf', (done) => {
     const messages = [
       {key: keysAndItems[0].key, gid: 'mygroup'},
       {key: keysAndItems[1].key, gid: 'mygroup'},
-      {key: keysAndItems[2].key, gid: 'mygroup'},
-      {key: keysAndItems[3].key, gid: 'mygroup'},
-      {key: keysAndItems[4].key, gid: 'mygroup'}, 
     ];
 
     // Based on where you think the items should be, send the messages to the right nodes...
     const remote = {node: n2, service: 'mem', method: 'get'};
     let processed = 0;
-    messages.forEach((msg) => {
+    messages.forEach((msg, index) => {
       distribution.local.comm.send([msg], remote, (e, v) => {
         try {
           expect(e).toBeFalsy();
-          expect(v).toEqual(v.item);
+          expect(v).toEqual(keysAndItems[index].item);
           processed += 1;
           if (processed === messages.length) {
             done();
@@ -247,6 +233,18 @@ test('(5 pts) (scenario) redistribute keys and values among nodes', (done) => {
     // Helper to process a single node's data
     const processNode = (node, dataToProcess, callback) => {
       const entries = Object.entries(dataToProcess);
+      let completed = 0;
+      if (completed === entries.length) {
+        return callback();
+      }
+      entries.forEach(([k, v]) => {
+        distribution.shuffleGroup.store.append(v, k, (e, v) => {
+          completed += 1
+          if (completed === entries.length) {
+            return callback();
+          }
+        });
+      });
     };
 
     // Process n1's data, then n2's data, and finlly check the results
@@ -263,10 +261,11 @@ test('(5 pts) (scenario) redistribute keys and values among nodes', (done) => {
       try {
         expect(e).toBeFalsy();
         // What do you expect the value to be?
-
+        expect(v).toEqual(['one', 'two']);
         // Check 'lc' aggregation
         distribution.shuffleGroup.store.get('lc', (e, v) => {
           expect(e).toBeFalsy();
+          expect(v).toEqual(['three']);
           // What do you expect the value to be?
           done();
         });
