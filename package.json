@@ -95,13 +95,13 @@
       },
       "throughput": {
         "dev": ["Insert: 308.07 operations/sec", "Query: 379.79 operations/sec"],
-        "aws": []
+        "aws": ["Insert: 475.06 operations/sec", "Query: 539.08 operations/sec"]
       },
       "latency": {
         "dev": ["Insert: 3.25ms average", "Query: 2.63ms average"],
-        "aws": []
+        "aws": ["Insert: 2.10ms average", "Query: 1.85ms average"]
       },
-      "dloc": -99
+      "dloc": 3000
     },
     {
       "milestone": "M5",
