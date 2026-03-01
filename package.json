@@ -87,18 +87,18 @@
     {
       "milestone": "M4",
       "hours": 14,
-      "loc": 999,
+      "loc": 732,
       "dev": {
-        "cpu-no": 999,
-        "mem-gb": 999,
-        "ssd-gb": 999
+        "cpu-no": 16,
+        "mem-gb": 7,
+        "ssd-gb": 476
       },
       "throughput": {
-        "dev": [],
+        "dev": ["Insert: 308.07 operations/sec", "Query: 379.79 operations/sec"],
         "aws": []
       },
       "latency": {
-        "dev": [],
+        "dev": ["Insert: 3.25ms average", "Query: 2.63ms average"],
         "aws": []
       },
       "dloc": -99
