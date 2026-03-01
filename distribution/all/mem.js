@@ -99,7 +99,9 @@ function mem(config) {
       }
       const remote = {node: node, service: `mem`, method: `put`};
       const localConfig = {key: key, gid: gid};
-      globalThis.distribution.local.comm.send([state, localConfig], remote, callback);
+      globalThis.distribution.local.comm.send([state, localConfig], remote, (e, v) => {
+        callback(e, v);
+      });
     });
   }
 

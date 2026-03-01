@@ -32,16 +32,17 @@ function parseConfig(config) {
  * @param {Callback} callback
  */
 function put(state, configuration, callback) {
-  let {key, gid} = parseConfig(configuration);
-  if (key === null) {
-    key = id.getID(state);
+  try {
+    let {key, gid} = parseConfig(configuration);
+    if (key === null) {
+      key = id.getID(state);
+    }
+    const storeKey = `${gid}:${key}`;
+    store[storeKey] = state;
+    callback(null, state);
+  } catch(e) {
+    callback(e, null);
   }
-
-
-  const storeKey = `${gid}:${key}`;
-
-  store[storeKey] = state;
-  callback(null, state);
 };
 
 /**
