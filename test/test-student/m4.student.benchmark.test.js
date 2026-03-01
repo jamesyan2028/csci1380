@@ -72,9 +72,6 @@ function printStats(label, latencies) {
   console.log(`  Total time : ${total} ms`);
   console.log(`  Throughput : ${throughput} ops/sec`);
   console.log(`  Avg latency: ${avg.toFixed(2)} ms`);
-  console.log(`  p50 latency: ${p50} ms`);
-  console.log(`  p95 latency: ${p95} ms`);
-  console.log(`  p99 latency: ${p99} ms`);
 }
 
 distribution.node.start(() => {
