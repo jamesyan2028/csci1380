@@ -72,10 +72,33 @@ const naiveHash = (kid, nids) => {
 
 /** @type { Hasher } */
 const consistentHash = (kid, nids) => {
+  const key = idToNum(kid);
+
+  const convertedNIDs = nids.map((nid) => ({num: idToNum(nid), id: nid}));
+  convertedNIDs.sort((a, b) => (a.num < b.num ? -1 : a.num > b.num ? 1 : 0));
+
+  const next = convertedNIDs.find((entry) => entry.num > key);
+  if (next === null) {
+    return convertedNIDs[0].id;
+  }
+  return next.id;
+
 };
 
 /** @type { Hasher } */
 const rendezvousHash = (kid, nids) => {
+  const scored = nids.map((nid) => {
+    const combined = kid + nid;
+    const hashed = idToNum(getID(combined));
+    return { score: hashed, id: nid };
+  });
+
+  const max = scored.reduce((max, entry) =>
+    entry.score > max.score ? entry : max
+  );
+
+  return max.id;
+
 };
 
 module.exports = {

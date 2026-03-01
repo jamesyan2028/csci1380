@@ -15,6 +15,44 @@
   Use the `path` module for that.
 */
 
+const path = require('path');
+const fs = require('fs');
+const serialization = require(`../util/serialization.js`);
+const { id } = require("../util/util.js");
+
+const STORE_DIR = path.resolve(__dirname, `../../store`);
+
+function parseConfig(config) {
+  if (config === null) {
+    return {key: null, gid: 'local'};
+  }
+  if (typeof config === 'string') {
+    return {key: config, gid: 'local'};
+  }
+  return {
+    key: config.key ?? null,
+    gid: config.gid ?? 'local',
+  };
+}
+
+
+function sanitizeKey(key) {
+  return key.replace(/[^a-zA-Z0-9]/g, '');
+}
+
+function getGidDir(gid) {
+  const dir = path.join(STORE_DIR, gid);
+  if (!fs.existsSync(dir)) {
+    fs.mkdirSync(dir, {recursive: true});
+  }
+  return dir
+}
+
+function getPath(gid, key) {
+  return path.resolve(getGidDir(gid), sanitizeKey(key));
+}
+
+
 
 /**
  * @param {any} state
@@ -22,7 +60,18 @@
  * @param {Callback} callback
  */
 function put(state, configuration, callback) {
-  return callback(new Error('store.put not implemented'));
+  let {key, gid} = parseConfig(configuration);
+  if (key === null) {
+    key = id.getID(state);
+  }
+
+  const path = getPath(gid, key);
+  try {
+    fs.writeFileSync(path, serialization.serialize(state));
+    return callback(null, state);
+  } catch (e) {
+    return callback(e, null);
+  }
 }
 
 /**
@@ -30,7 +79,22 @@ function put(state, configuration, callback) {
  * @param {Callback} callback
  */
 function get(configuration, callback) {
-  return callback(new Error('store.get not implemented'));
+  const {key, gid} = parseConfig(configuration);
+  if (key === null) {
+    return callback(new Error(`Cannot call get with null as key`), null);
+  }
+
+  const path = getPath(gid, key);
+  if (!fs.existsSync(path)) {
+    return callback(new Error(`Key '${key}' not found in gid '${gid}'`), null);
+  }
+
+  try {
+    const raw = fs.readFileSync(path, 'utf8');
+    return callback(null, serialization.deserialize(raw));
+  } catch (e) {
+    return callback(e, null);
+  }
 }
 
 /**
@@ -38,7 +102,24 @@ function get(configuration, callback) {
  * @param {Callback} callback
  */
 function del(configuration, callback) {
-  return callback(new Error('store.del not implemented'));
+  const {gid, key} = parseConfig(configuration);
+  if (key === null) {
+    return callback(new Error('Cannot call delete with null as key'), null);
+  }
+
+  const path = getPath(gid, key);
+  if (!fs.existsSync(path)) {
+    return callback(new Error(`Key '${key}' not found in gid '${gid}'`), null)
+  }
+
+  try {
+    const raw = fs.readFileSync(path, 'utf8');
+    const deserialized = serialization.deserialize(raw);
+    fs.unlinkSync(path);
+    return callback(null, deserialized);
+  } catch (e) {
+    return callback(e, null);
+  }
 }
 
 /**

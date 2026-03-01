@@ -26,12 +26,47 @@ function store(config) {
     subset: config.subset,
   };
 
+  function getNode(key, callback) {
+    globalThis.distribution.local.groups.get(context.gid, (e, group) => {
+      if (e) {
+        return callback(e, null);
+      }
+
+      const nids = Object.values(group).map((node) => globalThis.distribution.util.id.getNID(node));
+      const kid = globalThis.distribution.util.id.getID(key);
+
+      const targetNID = context.hash(kid, nids);
+
+      const targetNode = Object.values(group).find(
+        (node) => globalThis.distribution.util.id.getNID(node) === targetNID
+      );
+
+      if (!targetNode) {
+        return callback(new Error(`Could not find node for key ${key}`), null);
+      }
+      return callback(null, targetNode);
+    });
+  }
+
   /**
    * @param {SimpleConfig} configuration
    * @param {Callback} callback
    */
   function get(configuration, callback) {
-    return callback(new Error('store.get not implemented'));
+    const key = typeof configuration === 'string' ? configuration : configuration?.key;
+
+    if (key === null) {
+      return callback(new Error(`Cannot get with null as key`), null);
+    }
+
+    getNode(key, (e, node) => {
+      if (e) {
+        return callback(e, null);
+      }
+      const remote = {node: node, service: `store`, method: `get`};
+      const localConfig = {key: key, gid: context.gid};
+      globalThis.distribution.local.comm.send([localConfig], remote, callback);
+    });
   }
 
   /**
@@ -40,7 +75,19 @@ function store(config) {
    * @param {Callback} callback
    */
   function put(state, configuration, callback) {
-    return callback(new Error('store.put not implemented'));
+    let key = typeof configuration === 'string' ? configuration : configuration?.key;
+    if (key === null) {
+      key = globalThis.distribution.util.id.getID(state);
+    }
+
+    getNode(key, (e, node) => {
+      if (e) {
+        return callback(e, null);
+      }
+      const remote = {node: node, service: `store`, method: `put`};
+      const localConfig = {key: key, gid: context.gid};
+      globalThis.distribution.local.comm.send([state, localConfig], remote, callback);
+    });
   }
 
   /**
@@ -57,7 +104,20 @@ function store(config) {
    * @param {Callback} callback
    */
   function del(configuration, callback) {
-    return callback(new Error('store.del not implemented'));
+    const key = typeof configuration === 'string' ? configuration : configuration?.key;
+    if (key === null) {
+      return callback(new Error(`Delete key cannot be null`), null);
+    }
+
+    getNode(key, (e, node) => {
+      if (e) {
+        return callback(e, null);
+      }
+
+      const remote = {node: node, service: `store`, method: `del`};
+      const localConfig = {key: key, gid: context.gid};
+      globalThis.distribution.local.comm.send([localConfig], remote, callback);
+    });
   }
 
   /**
