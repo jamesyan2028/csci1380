@@ -33,6 +33,14 @@ function mem(config) {
   context.gid = config.gid || 'all';
   context.hash = config.hash || globalThis.distribution.util.id.naiveHash;
 
+  function getRoutingId(key) {
+    const isHex = typeof key === 'string' && /^[0-9a-fA-F]{64}$/.test(key);
+    if (isHex) {
+      return key;
+    }
+    return globalThis.distribution.util.id.getID(key);
+  }
+
   function getNode(gid, key, callback) {
     globalThis.distribution.local.groups.get(gid, (e, group) => {
       if (e) {
@@ -40,9 +48,11 @@ function mem(config) {
       }
 
       const nids = Object.values(group).map((node) => globalThis.distribution.util.id.getNID(node));
-      const kid = globalThis.distribution.util.id.getID(key);
+      //const kid = globalThis.distribution.util.id.getID(key);
 
-      const targetNID = context.hash(kid, nids);
+      const rid = getRoutingId(key);
+
+      const targetNID = context.hash(rid, nids);
 
       const targetNode = Object.values(group).find(
         (node) => globalThis.distribution.util.id.getNID(node) === targetNID
@@ -64,7 +74,7 @@ function mem(config) {
     ? configuration.gid
     : context.gid;
 
-    if (key === null) {
+    if (key === null || key == undefined) {
       return callback(new Error(`Cannot get with null as key`), null);
     }
 
@@ -89,7 +99,7 @@ function mem(config) {
     ? configuration.gid
     : context.gid;
 
-    if (key === null) {
+    if (key === null || key === undefined) {
       key = globalThis.distribution.util.id.getID(state);
     }
 
@@ -124,7 +134,7 @@ function mem(config) {
     ? configuration.gid
     : context.gid;
 
-    if (key === null) {
+    if (key === null || key === undefined) {
       return callback(new Error(`Delete key cannot be null`), null);
     }
 

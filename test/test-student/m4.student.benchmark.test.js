@@ -1,4 +1,4 @@
-const distribution = require('./distribution.js')();
+const distribution = require('../../distribution.js')();
 
 const n1 = {ip: '127.0.0.1', port: 9001};
 const n2 = {ip: '127.0.0.1', port: 9002};
@@ -65,9 +65,6 @@ function printStats(label, latencies) {
   const total   = latencies.reduce((a, b) => a + b, 0);
   const avg     = total / latencies.length;
   const sorted  = [...latencies].sort((a, b) => a - b);
-  const p50     = sorted[Math.floor(sorted.length * 0.50)];
-  const p95     = sorted[Math.floor(sorted.length * 0.95)];
-  const p99     = sorted[Math.floor(sorted.length * 0.99)];
   const throughput = (latencies.length / (total / 1000)).toFixed(2);
 
   console.log(`\n─── ${label} ───`);
