@@ -32,28 +32,33 @@ function get(name, callback) {
  */
 function put(config, group, callback) {
   let gid;
+  let hash;
   if (typeof config === 'string') {
     gid = config;
   } else if (config && typeof config === 'object' && config.gid) {
     gid = config.gid;
+    hash = config.hash;
   }
 
   if (typeof gid !== 'string' || gid.length === 0) {
     return callback(new Error(`Invalid GID: ${config}`), null);
-  }
+  } 
 
   groups[gid] = group;
 
+  
   globalThis.distribution[gid] = {};
 
-  globalThis.distribution[gid].status = require('../all/status')({gid: gid});
-  globalThis.distribution[gid].comm = require('../all/comm')({gid: gid});
-  globalThis.distribution[gid].groups = require('../all/groups')({gid: gid});
-  globalThis.distribution[gid].routes = require('../all/routes')({gid: gid});
-  globalThis.distribution[gid].gossip = require('../all/gossip')({gid: gid});
-  globalThis.distribution[gid].mem = require('../all/mem')({gid: gid});
-  globalThis.distribution[gid].store = require('../all/store')({gid: gid});
-  globalThis.distribution[gid].mr = require('../all/mr')({gid: gid});
+  const serviceConfig = {gid: gid, hash: hash};
+
+  globalThis.distribution[gid].status = require('../all/status')(serviceConfig);
+  globalThis.distribution[gid].comm = require('../all/comm')(serviceConfig);
+  globalThis.distribution[gid].groups = require('../all/groups')(serviceConfig);
+  globalThis.distribution[gid].routes = require('../all/routes')(serviceConfig);
+  globalThis.distribution[gid].gossip = require('../all/gossip')(serviceConfig);
+  globalThis.distribution[gid].mem = require('../all/mem')(serviceConfig);
+  globalThis.distribution[gid].store = require('../all/store')(serviceConfig);
+  globalThis.distribution[gid].mr = require('../all/mr')(serviceConfig);
 
   callback(null, group);
 }

@@ -37,6 +37,7 @@ function put(state, configuration, callback) {
     key = id.getID(state);
   }
 
+
   const storeKey = `${gid}:${key}`;
 
   store[storeKey] = state;

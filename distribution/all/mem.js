@@ -33,8 +33,8 @@ function mem(config) {
   context.gid = config.gid || 'all';
   context.hash = config.hash || globalThis.distribution.util.id.naiveHash;
 
-  function getNode(key, callback) {
-    globalThis.distribution.local.groups.get(context.gid, (e, group) => {
+  function getNode(gid, key, callback) {
+    globalThis.distribution.local.groups.get(gid, (e, group) => {
       if (e) {
         return callback(e, null);
       }
@@ -60,17 +60,20 @@ function mem(config) {
    */
   function get(configuration, callback) {
     const key = typeof configuration === 'string' ? configuration : configuration?.key;
+    const gid = (typeof configuration === 'object' && configuration !== null && configuration.gid)
+    ? configuration.gid
+    : context.gid;
 
     if (key === null) {
       return callback(new Error(`Cannot get with null as key`), null);
     }
 
-    getNode(key, (e, node) => {
+    getNode(gid, key, (e, node) => {
       if (e) {
         return callback(e, null);
       }
       const remote = {node: node, service: `mem`, method: `get`};
-      const localConfig = {key: key, gid: context.gid};
+      const localConfig = {key: key, gid: gid};
       globalThis.distribution.local.comm.send([localConfig], remote, callback);
     });
   }
@@ -82,16 +85,20 @@ function mem(config) {
    */
   function put(state, configuration, callback) {
     let key = typeof configuration === 'string' ? configuration : configuration?.key;
+    const gid = (typeof configuration === 'object' && configuration !== null && configuration.gid)
+    ? configuration.gid
+    : context.gid;
+
     if (key === null) {
       key = globalThis.distribution.util.id.getID(state);
     }
 
-    getNode(key, (e, node) => {
+    getNode(gid, key, (e, node) => {
       if (e) {
         return callback(e, null);
       }
       const remote = {node: node, service: `mem`, method: `put`};
-      const localConfig = {key: key, gid: context.gid};
+      const localConfig = {key: key, gid: gid};
       globalThis.distribution.local.comm.send([state, localConfig], remote, callback);
     });
   }
@@ -111,17 +118,21 @@ function mem(config) {
    */
   function del(configuration, callback) {
     const key = typeof configuration === 'string' ? configuration : configuration?.key;
+    const gid = (typeof configuration === 'object' && configuration !== null && configuration.gid)
+    ? configuration.gid
+    : context.gid;
+
     if (key === null) {
       return callback(new Error(`Delete key cannot be null`), null);
     }
 
-    getNode(key, (e, node) => {
+    getNode(gid, key, (e, node) => {
       if (e) {
         return callback(e, null);
       }
 
       const remote = {node: node, service: `mem`, method: `del`};
-      const localConfig = {key: key, gid: context.gid};
+      const localConfig = {key: key, gid: gid};
       globalThis.distribution.local.comm.send([localConfig], remote, callback);
     });
   }
