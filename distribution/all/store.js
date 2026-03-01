@@ -55,7 +55,7 @@ function store(config) {
   function get(configuration, callback) {
     const key = typeof configuration === 'string' ? configuration : configuration?.key;
 
-    if (key === null) {
+    if (key === null || key == undefined) {
       return callback(new Error(`Cannot get with null as key`), null);
     }
 
@@ -76,7 +76,7 @@ function store(config) {
    */
   function put(state, configuration, callback) {
     let key = typeof configuration === 'string' ? configuration : configuration?.key;
-    if (key === null) {
+    if (key === null || key == undefined) {
       key = globalThis.distribution.util.id.getID(state);
     }
 
@@ -105,7 +105,7 @@ function store(config) {
    */
   function del(configuration, callback) {
     const key = typeof configuration === 'string' ? configuration : configuration?.key;
-    if (key === null) {
+    if (key === null || key == undefined) {
       return callback(new Error(`Delete key cannot be null`), null);
     }
 
