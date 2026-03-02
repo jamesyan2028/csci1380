@@ -184,3 +184,35 @@ RPCs are an abstraction that let a node to run a function available only on a di
 
 RPCs are an abstraction that let a node to run a function available only on a different node without having to worry about the networking/communication internals. RPCs allow the client node to run a function remotely just as if it were available locally.
 
+
+# M4: Distributed Storage
+
+
+## Summary
+
+> Summarize your implementation, including key challenges you encountered
+To support local in memory storage, a hashmap was created in local/mem to support read and write operations locally. To support local disk storage, a very similar implementation to local storage was used but fs library functions and custom serialization/deserialization functions from M1 were used to write to the file system. Both of these implementations were fairly straightforward. 
+
+To implement distributed in memory storage, hashing is first used to determine which node in a group to make a remote call to. Because different groups could be initialized with different hash functions, local/groups had to be updated to store both the gid and the hash function, which was something I didn't realize initially. In addition, debugging tests due to insufficient error handling on the first pass took most of the time of this milestone. In particular, handling the case where reading from an undefined key took particularly long to debug since reading from configuration.key when configuration is null returns undefined, not null. The error handling in this section took particularly long to debug. The distributed disk storage is almost identical to the in memory storage except that it calls the local/store service instead of local/mem.
+
+Remember to update the `report` section of the `package.json` file with the total number of hours it took you to complete each task of M4 (`hours`) and the lines of code per task.
+
+
+## Correctness & Performance Characterization
+
+> Describe how you characterized the correctness and performance of your implementation
+
+
+*Correctness* -- number of tests and time they take.
+5 tests were written to handle common use cases for local and distributed store both loth in memory and in disk, including creating and putting multiple items across several nodes, and putting with null key. Test suite executes in 2.621s locally.
+
+*Performance* -- insertion and retrieval.
+Put and queried 1000 objects across 3 AWS EC2 micro instances with an average latency of 32.3ms for put and 31.9ms for query. Throughput of 31.0 operations/sec for put and 31.4 operations/sec for query.
+
+## Key Feature
+
+> Why is the `reconf` method designed to first identify all the keys to be relocated and then relocate individual objects instead of fetching all the objects immediately and then pushing them to their corresponding locations?
+
+Transfering objects individually instead of processing an entire batch at once allows the system to be much more resilient to faults. If an error occurs while transferring an individual key, engineers are able to still keep track of the state because they know exactly which key failed. When a failure in a batch transfer occurs, we have no idea what keys have been moved to which nodes.
+
+

@@ -94,12 +94,12 @@
         "ssd-gb": 476
       },
       "throughput": {
-        "dev": ["Insert: 308.07 operations/sec", "Query: 379.79 operations/sec"],
-        "aws": ["Insert: 475.06 operations/sec", "Query: 539.08 operations/sec"]
+        "dev": ["Insert: 308.07 operations/sec", "Query: 379.79 operations/sec", "note this is on same IP address"],
+        "aws": ["Insert: 31.0 operations/sec", "Query: 31.4 operations/sec"]
       },
       "latency": {
-        "dev": ["Insert: 3.25ms average", "Query: 2.63ms average"],
-        "aws": ["Insert: 2.10ms average", "Query: 1.85ms average"]
+        "dev": ["Insert: 3.25ms average", "Query: 2.63ms average", "note this is on same IP address"],
+        "aws": ["Insert: 32.3ms average", "Query: 31.9ms average"]
       },
       "dloc": 3000
     },

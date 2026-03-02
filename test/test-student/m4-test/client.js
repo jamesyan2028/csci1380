@@ -2,9 +2,9 @@ require('../../../distribution.js')();
 const distribution = globalThis.distribution;
 const id = distribution.util.id;
 
-const n1 = {ip: '3.12.84.249', port: 7110};
-const n2 = {ip: '3.145.106.173', port: 7110};
-const n3 = {ip: '3.133.157.48', port: 7110};
+const n1 = {ip: '3.12.84.249', port: 8080};
+const n2 = {ip: '3.145.106.173', port: 8080};
+const n3 = {ip: '3.133.157.48', port: 8080};
 
 const storeGroup = {};
 storeGroup[id.getSID(n1)] = n1;
