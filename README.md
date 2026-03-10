@@ -184,6 +184,38 @@ RPCs are an abstraction that let a node to run a function available only on a di
 
 RPCs are an abstraction that let a node to run a function available only on a different node without having to worry about the networking/communication internals. RPCs allow the client node to run a function remotely just as if it were available locally.
 
+# M3: Node Groups & Gossip Protocols
+
+
+## Summary
+
+> Summarize your implementation, including key challenges you encountered. Remember to update the `report` section of the `package.json` file with the total number of hours it took you to complete each task of M3 (`hours`) and the lines of code per task.
+
+Each node now stores a local groups service, which is a mapping from group ID, provided by user, to a set of node IPs and port numbers. Each node can inititally access only two groups, local, which contains only the current node, and all, which is part of the distribution object and contains all of the known nodes. When a new group is added using local put() function, the new group is not only registered locally in the current node's group hashmap, but is also dynamically added to the distribution object, which includes adding support for services like routes and comm unique to that group.
+
+The distributed groups functionality is an abstraction over the local group functionality. It utilizes the distributed comm function to broadcast the same message to all known nodes within a group.
+
+My implementation comprises 8 new software components, totaling 650 added lines of code over the previous implementation. Key challenges included understanding that new groups needed to be registered to the global distribution object as well as the local mapping, and that different groups should be able to support unique versions of different services attached to the global distribution object. This understanding that groups exist not only in the mappings of the local node but also globally was a key challenge that took me a significant amount of time to understand by consulting with TAs.
+
+
+## Correctness & Performance Characterization
+
+> Describe how you characterized the correctness and performance of your implementation
+
+
+*Correctness* -- number of tests and time they take.
+5 additional tests and 4 scenarios were written to verify the correctness of the implementations. These additional tests run locally in 1.255s.
+
+*Performance* -- spawn times (all students) and gossip (lab/ec-only).
+Nodes spawned with 135ms latency locally with a throughput of 7.41 nodes/sec. On AWS, nodes spawned in with 143.2ms latency and a throughput of 6.87 nodes/sec.
+
+## Key Feature
+
+> What is the point of having a gossip protocol? Why doesn't a node just send the message to _all_ other nodes in its group?
+
+To broadcast to all nodes in a distributed system with n nodes, a node would have to initiate n - 1 network calls, which could severely congest the network and cause CPU spikes. By using gossip protocols, a node only needs to send to log(n) nodes, allowing for far greater scalability. 
+
+
 
 # M4: Distributed Storage
 
