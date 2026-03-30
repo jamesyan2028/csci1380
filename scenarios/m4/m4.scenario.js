@@ -4,6 +4,8 @@ require('../../distribution.js')();
 const distribution = globalThis.distribution;
 const util = distribution.util;
 const id = distribution.util.id;
+const fs = require('fs');
+const path = require('path');
 
 //jest.setTimeout(30000);
 
@@ -339,6 +341,8 @@ afterAll((done) => {
               if (globalThis.distribution.node.server) {
                 globalThis.distribution.node.server.close();
               }
+              const STORE_DIR = path.resolve(__dirname, '../../node_modules/@brown-ds/distribution/store');
+              fs.rmSync(STORE_DIR, { recursive: true, force: true });
               done();
             });
           });

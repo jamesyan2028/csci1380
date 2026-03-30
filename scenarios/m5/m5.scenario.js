@@ -1,6 +1,8 @@
 require('../../distribution.js')();
 const distribution = globalThis.distribution;
 const id = distribution.util.id;
+const fs = require('fs');
+const path = require('path');
 
 const ncdcGroup = {};
 const dlibGroup = {};
@@ -94,9 +96,14 @@ test('(10 pts) (scenario) all.mr:dlib', (done) => {
 */
 
   const mapper = (key, value) => {
+    const words = value.split(/\s+/).filter(word => word.length > 0);
+    return words.map(word => ({ [word]: 1 }));
   };
 
   const reducer = (key, values) => {
+    let out = {}
+    out[key] = values.reduce((sum, curr) => sum + curr, 0)
+    return out
   };
 
   const dataset = [
@@ -169,11 +176,41 @@ test('(10 pts) (scenario) all.mr:tfidf', (done) => {
 */
 
   const mapper = (key, value) => {
+    let counts = {};
+    const words = value.split(/\s+/).filter(word => word.length > 0)
+    words.forEach(word => {
+      if (counts[word]) {
+        counts[word] += 1;
+      } else {
+        counts[word] = 1;
+      }
+    });
+    let out = {}
+
+    for (let word in counts) {
+      out[word] = {docID: key, count: counts[word], docLength: words.length};
+    }
+
+    return Object.keys(out).map(word => ({ [word]: out[word] }));
+
   };
 
   // Reduce function: calculate TF-IDF for each word
   const reducer = (key, values) => {
     const totalDocs = 3;
+    numDocs = values.length;
+    const idf = Math.log10(totalDocs / numDocs);
+    
+    docScores = {}
+    values.forEach(val => {
+      const tf = val.count / val.docLength;
+      const tfidf = tf * idf;
+      docScores[val.docID] = Number(tfidf.toFixed(2));
+    })
+
+    let out = {};
+    out[key] = docScores;
+    return out;
   };
 
   const dataset = [
@@ -233,7 +270,7 @@ test('(10 pts) (scenario) all.mr:tfidf', (done) => {
   - Create a dataset.
   - Run the map reduce.
 */
-
+/*
 test('(10 pts) (scenario) all.mr:crawl', (done) => {
     done(new Error('Implement this test.'));
 });
@@ -241,11 +278,89 @@ test('(10 pts) (scenario) all.mr:crawl', (done) => {
 test('(10 pts) (scenario) all.mr:urlxtr', (done) => {
     done(new Error('Implement the map and reduce functions'));
 });
-
+*/
 test('(10 pts) (scenario) all.mr:strmatch', (done) => {
-    done(new Error('Implement the map and reduce functions'));
-});
+  const mapper = (key, value) => {
 
+    const patterns = {
+      learning: /learning/i,
+      cs_course: /cs\d+/i,
+      starts_with_machine: /^machine/i
+    };
+    
+    let out = [];
+    
+    for (let label in patterns) {
+      if (patterns[label].test(value)) {
+        out.push({ [label]: key });
+      }
+    }
+    return out;
+  };
+
+  const reducer = (key, values) => {
+    const out = {};
+    out[key] = [...new Set(values)];
+    return out;
+    
+
+  };
+
+  const dataset = [
+    {'doc1': 'machine learning is amazing'},
+    {'doc2': 'deep learning powers amazing systems'},
+    {'doc3': 'machine learning and deep learning are related'},
+    {'doc4': 'bruh'},
+    {'doc5': 'cs1380 is cool'},
+    {'doc6': 'Distributed string matching: Given a regular expression, identify all the object IDs that match that regular expression in the dataset. String matching is achieved by map, and all results are accumulated via reduce.'}
+  ];
+
+  
+  //const expected = [
+  //  { 'learning': ['doc1', 'doc2', 'doc3'] },
+  //  { 'cs_course': ['doc5'] },
+  //  { 'starts_with_machine': ['doc1', 'doc3'] }
+  //];
+
+  const doMapReduce = () => {
+    distribution.strmatch.store.get(null, (e, v) => {
+      try {
+        expect(v.length).toEqual(dataset.length);
+      } catch (e) {
+        done(e);
+      }
+
+      distribution.strmatch.mr.exec({keys: v, map: mapper, reduce: reducer}, (e, v) => {
+        try {
+          expect(v).toEqual(expect.arrayContaining([
+            {learning: expect.arrayContaining(['doc1', 'doc2', 'doc3']) },
+            {cs_course: expect.arrayContaining(['doc5']) },
+            {starts_with_machine: expect.arrayContaining(['doc1', 'doc3']) },
+          ]));
+          done();
+        } catch (e) {
+          done(e);
+        }
+      });
+    });
+  };
+
+  let cntr = 0;
+
+  // Send the dataset to the cluster
+  dataset.forEach((o) => {
+    const key = Object.keys(o)[0];
+    const value = o[key];
+    distribution.strmatch.store.put(value, key, (e, v) => {
+      cntr++;
+      // Once the dataset is in place, run the map reduce
+      if (cntr === dataset.length) {
+        doMapReduce();
+      }
+    });
+  });
+});
+/*
 test('(10 pts) (scenario) all.mr:ridx', (done) => {
     done(new Error('Implement the map and reduce functions'));
 });
@@ -253,7 +368,7 @@ test('(10 pts) (scenario) all.mr:ridx', (done) => {
 test('(10 pts) (scenario) all.mr:rlg', (done) => {
     done(new Error('Implement the map and reduce functions'));
 });
-
+*/
 /*
     This is the setup for the test scenario.
     Do not modify the code below.
@@ -314,7 +429,12 @@ beforeAll((done) => {
               const tfidfConfig = {gid: 'tfidf'};
               distribution.local.groups.put(tfidfConfig, tfidfGroup, (e, v) => {
                 distribution.tfidf.groups.put(tfidfConfig, tfidfGroup, (e, v) => {
-                  done();
+                  const strMatchGroupConfig = {gid: 'strmatch'};
+                  distribution.local.groups.put(strMatchGroupConfig, strmatchGroup, (e, v) => {
+                    distribution.strmatch.groups.put(strMatchGroupConfig, strmatchGroup, (e, v) => {
+                      done();
+                    });
+                  });
                 });
               });
             });
@@ -336,6 +456,8 @@ afterAll((done) => {
         if (globalThis.distribution.node.server) {
           globalThis.distribution.node.server.close();
         }
+        const STORE_DIR = path.resolve(__dirname, '../../node_modules/@brown-ds/distribution/store');
+        fs.rmSync(STORE_DIR, { recursive: true, force: true });
         done();
       });
     });
