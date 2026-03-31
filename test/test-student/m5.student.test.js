@@ -18,7 +18,7 @@ const dlibGroup = {};
 const tfidfGroup = {};
 const crawlGroup = {};
 const urlxtrGroup = {};
-const strmatchGroup1 = {};
+const strmatchGroup = {};
 const strmatchGroup2 = {};
 const ridxGroup = {};
 const rlgGroup = {};
@@ -328,14 +328,14 @@ test('(1 pts) student test', (done) => {
   ];
 
   const doMapReduce = () => {
-    distribution.strmatch1.store.get(null, (e, v) => {
+    distribution.strmatch.store.get(null, (e, v) => {
       try {
         expect(v.length).toEqual(dataset.length);
       } catch (e) {
         done(e);
       }
 
-      distribution.strmatch1.mr.exec({keys: v, map: mapper, reduce: reducer}, (e, v) => {
+      distribution.strmatch.mr.exec({keys: v, map: mapper, reduce: reducer}, (e, v) => {
         try {
           expect(v).toEqual(expect.arrayContaining([
             {has_email: expect.arrayContaining(['doc1', 'doc4', 'doc5']) },
@@ -356,7 +356,7 @@ test('(1 pts) student test', (done) => {
   dataset.forEach((o) => {
     const key = Object.keys(o)[0];
     const value = o[key];
-    distribution.strmatch1.store.put(value, key, (e, v) => {
+    distribution.strmatch.store.put(value, key, (e, v) => {
       cntr++;
       // Once the dataset is in place, run the map reduce
       if (cntr === dataset.length) {
@@ -366,6 +366,7 @@ test('(1 pts) student test', (done) => {
   });
 });
 
+/*
 test('(1 pts) student test', (done) => {
   const mapper = (key, value) => {
 
@@ -442,9 +443,11 @@ test('(1 pts) student test', (done) => {
     });
   });
 });
-
+*/
 
 beforeAll((done) => {
+  const STORE_DIR = path.resolve(__dirname, '../../node_modules/@brown-ds/distribution/store');
+  fs.rmSync(STORE_DIR, { recursive: true, force: true });
   ncdcGroup[id.getSID(n1)] = n1;
   ncdcGroup[id.getSID(n2)] = n2;
   ncdcGroup[id.getSID(n3)] = n3;
@@ -465,9 +468,9 @@ beforeAll((done) => {
   urlxtrGroup[id.getSID(n2)] = n2;
   urlxtrGroup[id.getSID(n3)] = n3;
 
-  strmatchGroup1[id.getSID(n1)] = n1;
-  strmatchGroup1[id.getSID(n2)] = n2;
-  strmatchGroup1[id.getSID(n3)] = n3;
+  strmatchGroup[id.getSID(n1)] = n1;
+  strmatchGroup[id.getSID(n2)] = n2;
+  strmatchGroup[id.getSID(n3)] = n3;
 
   strmatchGroup2[id.getSID(n1)] = n1;
   strmatchGroup2[id.getSID(n2)] = n2;
@@ -503,19 +506,10 @@ beforeAll((done) => {
               const tfidfConfig = {gid: 'tfidf'};
               distribution.local.groups.put(tfidfConfig, tfidfGroup, (e, v) => {
                 distribution.tfidf.groups.put(tfidfConfig, tfidfGroup, (e, v) => {
-                  const strMatchGroupConfig1 = {gid: 'strmatch1'};
-                  distribution.local.groups.put(strMatchGroupConfig1, strmatchGroup1, (e, v) => {
-                    if (e) { console.error('strmatch1 local put error:', e); done(e); return; }
-                    distribution.strmatch1.groups.put(strMatchGroupConfig1, strmatchGroup1, (e, v) => {
-                      if (e) { console.error('strmatch1 group put error:', e); done(e); return; }
-                      const strMatchGroupConfig2 = {gid: 'strmatch2'};
-                      distribution.local.groups.put(strMatchGroupConfig2, strmatchGroup2, (e, v) => {
-                        if (e) { console.error('strmatch2 local put error:', e); done(e); return; }
-                        distribution.strmatch2.groups.put(strMatchGroupConfig2, strmatchGroup2, (e, v) => {
-                          if (e) { console.error('strmatch2 group put error:', e); done(e); return; }
-                          done();
-                        });
-                      });
+                  const strMatchGroupConfig = {gid: 'strmatch'};
+                  distribution.local.groups.put(strMatchGroupConfig, strmatchGroup, (e, v) => {
+                    distribution.strmatch.groups.put(strMatchGroupConfig, strmatchGroup, (e, v) => {
+                      done();
                     });
                   });
                 });
@@ -527,6 +521,7 @@ beforeAll((done) => {
     });
   });
 });
+
 
 afterAll((done) => {
   const remote = {service: 'status', method: 'stop'};

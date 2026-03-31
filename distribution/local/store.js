@@ -128,7 +128,27 @@ function del(configuration, callback) {
  * @param {Callback} callback
  */
 function append(state, configuration, callback) {
-  return callback(new Error('store.append not implemented'));
+  const {key, gid} = parseConfig(configuration);
+  if (key === null) return callback(new Error('Cannot append with null key'), null);
+
+  const path = getPath(gid, key);
+
+  let curr = [];
+  if (fs.existsSync(path)) {
+    try {
+      curr = serialization.deserialize(fs.readFileSync(path, 'utf8'));
+    } catch (e) {
+      return callback(e, null);
+    }
+  }
+
+  curr.push(state);
+  try {
+    fs.writeFileSync(path, serialization.serialize(curr));
+    return callback(null, curr);
+  } catch (e) {
+    return callback(e, null);
+  }
 }
 
 module.exports = {put, get, del, append};

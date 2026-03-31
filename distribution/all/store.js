@@ -96,7 +96,18 @@ function store(config) {
    * @param {Callback} callback
    */
   function append(state, configuration, callback) {
-    return callback(new Error('store.append not implemented')); // You'll need to implement this method for the distributed processing milestone.
+    let key = typeof configuration === 'string' ? configuration : configuration?.key;
+    if (key === null || key == undefined) {
+      return callback(new Error('Cannot append with null key'), null);
+    }
+
+    getNode(key, (e, node) => {
+      if (e) return callback(e, null);
+
+      const remote = {node: node, service: 'store', method: 'append'};
+      const localConfig = {key: key, gid: context.gid};
+      globalThis.distribution.local.comm.send([state, localConfig], remote, callback);
+    });
   }
 
   /**
