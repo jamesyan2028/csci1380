@@ -56,7 +56,31 @@ function store(config) {
     const key = typeof configuration === 'string' ? configuration : configuration?.key;
 
     if (key === null || key == undefined) {
-      return callback(new Error(`Cannot get with null as key`), null);
+      globalThis.distribution.local.groups.get(context.gid, (e, group) => {
+        if (e) return callback(e, null);
+
+        const nodes = Object.values(group);
+        if (nodes.length === 0) return callback(null, []);
+
+        let received = 0;
+        const allKeys = [];
+        const errors = [];
+
+        nodes.forEach((node) => {
+          const remote = {node, service: 'store', method: 'get', gid: 'local'};
+          const localConfig = {key: null, gid: context.gid};
+          globalThis.distribution.local.comm.send([localConfig], remote, (e, keys) => {
+            if (e) errors.push(e);
+            else if (Array.isArray(keys)) allKeys.push(...keys);
+
+            received += 1;
+            if (received === nodes.length) {
+              callback(errors.length > 0 ? errors[0] : null, allKeys);
+            }
+          });
+        });
+      });
+      return;
     }
 
     getNode(key, (e, node) => {

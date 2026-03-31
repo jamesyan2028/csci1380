@@ -308,6 +308,10 @@ test('(1 pts) student test', (done) => {
         out.push({ [label]: key });
       }
     }
+
+    if (out.length === 0) {
+      out.push({ __none__: key });
+    }
     return out;
   };
 
@@ -329,10 +333,12 @@ test('(1 pts) student test', (done) => {
 
   const doMapReduce = () => {
     distribution.strmatch.store.get(null, (e, v) => {
+      if (e && Object.keys(e).length > 0) { done(e); return; }
       try {
         expect(v.length).toEqual(dataset.length);
       } catch (e) {
         done(e);
+        return;
       }
 
       distribution.strmatch.mr.exec({keys: v, map: mapper, reduce: reducer}, (e, v) => {
@@ -366,7 +372,7 @@ test('(1 pts) student test', (done) => {
   });
 });
 
-/*
+
 test('(1 pts) student test', (done) => {
   const mapper = (key, value) => {
 
@@ -383,6 +389,11 @@ test('(1 pts) student test', (done) => {
         out.push({ [label]: key });
       }
     }
+
+    if (out.length === 0) {
+      out.push({ __none__: key });
+    }
+    
     return out;
   };
 
@@ -443,7 +454,7 @@ test('(1 pts) student test', (done) => {
     });
   });
 });
-*/
+
 
 beforeAll((done) => {
   const STORE_DIR = path.resolve(__dirname, '../../node_modules/@brown-ds/distribution/store');
@@ -509,7 +520,12 @@ beforeAll((done) => {
                   const strMatchGroupConfig = {gid: 'strmatch'};
                   distribution.local.groups.put(strMatchGroupConfig, strmatchGroup, (e, v) => {
                     distribution.strmatch.groups.put(strMatchGroupConfig, strmatchGroup, (e, v) => {
-                      done();
+                      const strMatchGroupConfig2 = {gid: 'strmatch2'};
+                      distribution.local.groups.put(strMatchGroupConfig2, strmatchGroup2, (e, v) => {
+                        distribution.strmatch2.groups.put(strMatchGroupConfig2, strmatchGroup2, (e, v) => {
+                          done();
+                        });
+                      });
                     });
                   });
                 });

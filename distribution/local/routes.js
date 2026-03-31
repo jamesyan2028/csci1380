@@ -21,6 +21,10 @@ function get(configuration, callback) {
   }
 
   if (gid && gid !== 'local') {
+    const localService = services[name];
+    if (localService) {
+      return callback(null, localService);
+    }
     const groupService = global.distribution[gid];
     if (groupService && groupService[name]) {
       return callback(null, groupService[name]);

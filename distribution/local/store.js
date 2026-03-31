@@ -81,7 +81,13 @@ function put(state, configuration, callback) {
 function get(configuration, callback) {
   const {key, gid} = parseConfig(configuration);
   if (key === null) {
-    return callback(new Error(`Cannot call get with null as key`), null);
+    const gidDir = getGidDir(gid);
+    try {
+      const files = fs.readdirSync(gidDir);
+      return callback(null, files);
+    } catch (e) {
+      return callback(e, null);
+    }
   }
 
   const path = getPath(gid, key);
