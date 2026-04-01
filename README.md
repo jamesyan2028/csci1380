@@ -255,9 +255,11 @@ Transfering objects individually instead of processing an entire batch at once a
 ## Summary
 
 > Summarize your implementation, including key challenges you encountered. Remember to update the `report` section of the `package.json` file with the total number of hours it took you to complete each task of M5 (`hours`) and the lines of code per task.
+During the setup, the coordinator registers an mrService object on all nodes that contains the map, shuffle and reduce functions. The coordinator then registers all nodes into two temporary groups, mrGid for map input and shuffleGroupId for reduce output. The coordinator then copies data into the mrGid evenly using consistent hashing (changed to be the new default).
 
+The Map phase then executes, where all worker nodes call the locally registered map function on their partition of the data. The output of the map function is then stored locally in ${mrID}_map. After the map phase completely finishes, the shuffle phase happens. Each node reads the output of map from mrID_map, and use the distributed store.append method to route to the correct node inside the shuffleGroupId group. Finally after shuffling is completely done, the Reduce phase runs, where all nodes read the shuffle outputs from shuffleGroupId and run the reducer function. The output of reduce is returned to the coordinator. The coordinator then cleans up the mrService.
 
-My implementation comprises `<number>` new software components, totaling `<number>` added lines of code over the previous implementation. Key challenges included `<1, 2, 3 + how you solved them>`.
+My implementation comprises `3` new software components, totaling `1036` added lines of code over the previous implementation. Key challenges included determining that there needed to be two groups, in order for the output of map to not be mixed in with the output of shuffle in order to run reduce. Originally I implemented only one group, and continually ran into many issues during the shuffle and reduce phase since the raw output of map was mixed with the output of shuffle, causing reduce to fail.
 
 
 ## Correctness & Performance Characterization
@@ -265,12 +267,7 @@ My implementation comprises `<number>` new software components, totaling `<numbe
 > Describe how you characterized the correctness and performance of your implementation
 
 
-*Correctness*: I wrote <X> cases testing <1, 2, 3>.
+*Correctness*: I wrote 5 cases testing 3 workflows, maximum temperature, word frequency, tf-idf scores, and distributed string matching.
 
 
-*Performance*: My <workflow> can sustain <throughput> <unit>/second, with an average latency of <number> seconds per <unit>.
-
-
-## Key Feature
-
-> Which extra features did you implement and how?
+*Performance*: My word frequency workflow can sustain 24.77 100 word documents per second, with an average latency of 40.37ms seconds per document locally. 

@@ -1,4 +1,5 @@
 //benchmark mapreduce with word frequency
+//Usage: node [path to file]
 require('../../distribution.js')();
 const distribution = globalThis.distribution;
 const id = distribution.util.id;
