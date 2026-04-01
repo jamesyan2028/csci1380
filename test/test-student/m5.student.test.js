@@ -393,7 +393,7 @@ test('(1 pts) student test', (done) => {
     if (out.length === 0) {
       out.push({ __none__: key });
     }
-    
+
     return out;
   };
 
@@ -459,6 +459,8 @@ test('(1 pts) student test', (done) => {
 beforeAll((done) => {
   const STORE_DIR = path.resolve(__dirname, '../../node_modules/@brown-ds/distribution/store');
   fs.rmSync(STORE_DIR, { recursive: true, force: true });
+  const STORE_DIR_LOCAL = path.resolve(__dirname, '../../node_modules/@brown-ds/distribution/store');
+  fs.rmSync(STORE_DIR_LOCAL, { recursive: true, force: true });
   ncdcGroup[id.getSID(n1)] = n1;
   ncdcGroup[id.getSID(n2)] = n2;
   ncdcGroup[id.getSID(n3)] = n3;
@@ -552,6 +554,8 @@ afterAll((done) => {
         }
         const STORE_DIR = path.resolve(__dirname, '../../node_modules/@brown-ds/distribution/store');
         fs.rmSync(STORE_DIR, { recursive: true, force: true });
+        const STORE_DIR_LOCAL = path.resolve(__dirname, '../../node_modules/@brown-ds/distribution/store');
+        fs.rmSync(STORE_DIR_LOCAL, { recursive: true, force: true });
         done();
       });
     });

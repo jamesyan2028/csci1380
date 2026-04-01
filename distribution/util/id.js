@@ -78,7 +78,7 @@ const consistentHash = (kid, nids) => {
   convertedNIDs.sort((a, b) => (a.num < b.num ? -1 : a.num > b.num ? 1 : 0));
 
   const next = convertedNIDs.find((entry) => entry.num > key);
-  if (next === null) {
+  if (next === undefined) {
     return convertedNIDs[0].id;
   }
   return next.id;

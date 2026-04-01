@@ -41,11 +41,12 @@ function sanitizeKey(key) {
 }
 
 function getGidDir(gid) {
-  const dir = path.join(STORE_DIR, gid);
+  const nodeSID = globalThis.distribution.util.id.getSID(globalThis.distribution.node.config);
+  const dir = path.join(STORE_DIR, nodeSID, gid);
   if (!fs.existsSync(dir)) {
     fs.mkdirSync(dir, {recursive: true});
   }
-  return dir
+  return dir;
 }
 
 function getPath(gid, key) {
