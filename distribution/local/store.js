@@ -37,7 +37,7 @@ function parseConfig(config) {
 
 
 function sanitizeKey(key) {
-  return key.replace(/[^a-zA-Z0-9]/g, '');
+  return key.replace(/[^a-zA-Z0-9\-_]/g, '');
 }
 
 function getGidDir(gid) {

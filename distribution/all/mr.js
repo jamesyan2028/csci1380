@@ -116,7 +116,6 @@ function mr(config) {
         // Shuffle groups values by key (via store.append).
         globalThis.distribution.local.store.get(`${mrID}_map`, (e, mappedData) => {
           if (e) return callback(null, []);
-          if (e) return callback(e, null);
           if (!mappedData || mappedData.length === 0) return callback(null, []);
 
           let completed = 0;
@@ -124,8 +123,9 @@ function mr(config) {
 
           mappedData.forEach((obj) => {
             const [key] = Object.keys(obj);
-            globalThis.distribution[gid].store.append(obj[key], key, () => {
-              completed++;
+            const storageKey = globalThis.distribution.util.id.getID(key);
+            globalThis.distribution[gid].store.append({originalKey: key, value: obj[key]}, storageKey, () => {
+              completed += 1;
               if (completed === mappedData.length) {
                 return callback(null, mappedData);
               }
@@ -146,11 +146,13 @@ function mr(config) {
           let completed = 0;
           const reduced = [];
 
-          keys.forEach((key) => {
-            globalThis.distribution.local.store.get({key, gid}, (e, vals) => {
+          keys.forEach((storageKey) => {
+            globalThis.distribution.local.store.get({key: storageKey, gid}, (e, vals) => {
               completed += 1;
               if (e) return callback(e);
-              const result = this.reducer(key, vals);
+              const originalKey = vals[0].originalKey;
+              const values = vals.map((v) => v.value);
+              const result = this.reducer(originalKey, values);
               reduced.push(result);
               if (completed === keys.length) {
                 return callback(null, reduced);
@@ -178,7 +180,6 @@ function mr(config) {
             return;
           }
           globalThis.distribution[mrGid].store.put(val, {key, gid: mrGid}, (e) => {
-            console.log('copied key:', key, 'to mrGid:', mrGid, 'error:', e);
             if (e) firstError = firstError || e;
             completed += 1;
             if (completed === keys.length) {
@@ -214,11 +215,8 @@ function mr(config) {
               if (e) return callback(e);
 
               globalThis.distribution[context.gid].comm.send([mrGid, mrId], {service: `mr-${mrId}`, method: 'map'}, (e, mapResult) => {
-                console.log('MAP:', e, mapResult);
                 globalThis.distribution[context.gid].comm.send([shuffleGroupId, mrId], {service: `mr-${mrId}`, method: 'shuffle'}, (e, shuffleResult) => {
-                  console.log('SHUFFLE:', e, shuffleResult);
                   globalThis.distribution[context.gid].comm.send([shuffleGroupId, mrId], {service: `mr-${mrId}`, method: 'reduce'}, (e, reduceResult) => {
-                    console.log('REDUCE:', e, reduceResult);
                     let finalResults = [];
                     for (const val of Object.values(reduceResult)) {
                       if (val !== null) {
